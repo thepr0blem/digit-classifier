@@ -74,9 +74,6 @@ def data_aug(X_to_aug, y_to_aug, count_add=1000):
     return np.array(augmented_x).reshape(count_add, img_size **2), np.array(augmented_y).reshape(count_add, 1)
 
 
-
-
-
 def gen_missing_data(data):
 
     X, y = data

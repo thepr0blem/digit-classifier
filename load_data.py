@@ -31,12 +31,12 @@ no_of_classes = len(np.unique(y, return_counts=True)[0])
 
 X_cnn = X.reshape(X.shape[0], img_size, img_size, 1)
 
-X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.1, random_state=42)
+X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.2, random_state=42)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=42)
+# X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.8, random_state=42)
 
-y_train_cat = to_categorical(y_train)
-y_test_cat = to_categorical(y_test)
+# y_train_cat = to_categorical(y_train)
+# y_test_cat = to_categorical(y_test)
 
 y_train_cat_cnn = to_categorical(y_train_cnn)
 y_test_cat_cnn = to_categorical(y_test_cnn)

@@ -51,6 +51,9 @@ def plot_samples(X, y):
             axarr[i, j].set_title(labels[y[n][0]])
 
 
+plot_samples(X, y)
+
+
 def display_n(x, y, n):
     """Display n-th example from data set
 
