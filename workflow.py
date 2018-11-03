@@ -1,10 +1,22 @@
+"""This workflow goes through all the steps as presented in README"""
+
+# Imports
+
 import numpy as np
-from matplotlib import pyplot as plt
 import pickle
 import seaborn as sns
 import random as rd
 
-# Load the data
+from sklearn.model_selection import train_test_split
+from matplotlib import pyplot as plt
+from keras.utils import to_categorical
+
+from src import visualization as vis
+from src import modelling as mdl
+
+# 1 Loading and exploring the data
+# 1.1 Load the data
+
 data_dir = r'./data/train_fixed.pkl'
 
 file = open(data_dir, 'rb')
@@ -12,8 +24,6 @@ data = pickle.load(file)
 file.close()
 
 X, y = data
-
-no_of_classes = X.shape[0]
 
 # Labels dictionary
 
@@ -24,6 +34,7 @@ labels = {0: "6", 1: "P", 2: "O", 3: "V", 4: "W", 5: "3", 6: "A",
           28: "F", 29: "Z", 30: "U", 31: "Q", 32: "M", 33: "B", 34: "D"}
 
 
+# 1.2 Exploring data - sample
 # Plotting number of classes
 
 y_vec = y.reshape(y.shape[0], )
@@ -39,33 +50,24 @@ count_plot = sns.countplot(y_classes, palette="Blues_d")
 #           and was overlapped with class 14 (both were letter "N"). Single example from class 30 was moved to
 #           class 14 and class 35 was renamed to 30.
 
+vis.plot_samples(X, y, labels)
 
-def plot_samples(X, y):
-    f, axarr = plt.subplots(3, 3)
+# 1.3 Preprocessing the data
+# 1.3.1 Reshaping
 
-    for i in range(3):
-        for j in range(3):
-            n = rd.randint(0, X.shape[1])
-            axarr[i, j].imshow(X[n].reshape(56, 56), cmap='gray')
-            axarr[i, j].axis('off')
-            axarr[i, j].set_title(labels[y[n][0]])
+n_cols = X.shape[1]
+img_size = int(np.sqrt(n_cols))
+no_of_classes = len(np.unique(y, return_counts=True)[0])
 
+X_cnn = X.reshape(X.shape[0], img_size, img_size, 1)
 
-plot_samples(X, y)
+# 1.3.1 Split into training and testing set
 
+X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.2, random_state=42)
 
-def display_n(x, y, n):
-    """Display n-th example from data set
+y_train_cat_cnn = to_categorical(y_train_cnn)
+y_test_cat_cnn = to_categorical(y_test_cnn)
 
-    Args:
-        x: (i x j) array with i examples (each of them j features)
-        y: (i x 1) vector with labels
-        n: number of example to display
+# 2 Defining CNN architecture
 
-    Returns:
-        Displays n-th example and returns class label.
-    """
-    img_size = int(np.sqrt(x.shape[1]))
-    plt.imshow(x[n].reshape(img_size, img_size), cmap='gray')
-
-    return y[n][0]
+mdl.create_model(X_train_cnn, y_train_cnn)

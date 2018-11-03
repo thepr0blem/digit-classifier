@@ -1,7 +1,7 @@
 import random as rd
 import numpy as np
 
-from load_data import create_model
+from src.load_data import create_model
 
 parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
                   "kern_size": [3, 4, 5],
