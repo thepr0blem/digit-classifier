@@ -4,6 +4,14 @@ The purpose of this project is to develop convolutional neural network for writt
 
 ## Introduction 
 
+
++ What technologies did you use (e.g. Sci-kit, TensorFlow, PyTorch etc.)?
++ How did you validate your model? Provide an estimate of the expected
++ accuracy of the classifier.
++ What techniques did you utilize to improve your method (e.g. data
++ transformation, regularization, data augmentation, hyperparameter tuning,
+
+
 #### Project structure 
 
 folders
@@ -240,8 +248,8 @@ Defining the function which will perform random search given above set of hyperp
 
 The function will: 
 - use ```create model()``` function from above to train n number of models with randomly selected set of parameters
-- it will save all models in /models/random_search/models 
-- it will save set of parameters and training histories for all iterations in /models/random_search/params and models/random_search/hist accordingly 
+- it will save all models in ```./models/random_search/models``` 
+- it will save set of parameters and training histories for all iterations in ```./models/random_search/params``` and ```.models/random_search/hist``` accordingly 
 - only 15% of the whole data set will be used as I am looking only for indication which parameters will be the best instead of the ready model 
 
 ```python
@@ -319,4 +327,56 @@ mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=5
                  dens_size=256, val_split_perc=0.2, no_of_epochs=5,
                  optimizer="adam", random_search=False)
 ```
-Model will be saved as models/CNN_F.h5
+Model will be saved as models/CNN_model_F.h5
+
+## 3. Model evaluation
+### 3.1 Load model and evaluate on test data set 
+
+```python
+def load_saved_model(path):
+    """Loads model using keras.load_model() function.
+
+    Args:
+        path: Model folder directory.
+        filename: Name of the model file (.h5 file type)
+
+    Returns:
+        Keras model instance.
+    """
+    return load_model(path)
+```
+
+```
+model = mod.load_saved_model(r"./models/CNN_model_F.h5")
+```
+
+```
+score = mod.test_and_score(model, X_test_cnn, y_test_cat_cnn)
+```
+
+```
+score
+Out[6]: [0.9276472181848217, 0.7765057242804743]
+```
+Accuracy on test score is XX %. 
+
+### 3.2 Confusion matrix 
+
+Leveraging ```scikit-learn``` modules we can easily build confusion matrix. 
+
+### 3.3 Accuracy report 
+
+### 3.4 Display exemplary mistakes 
+
+## Conclusions 
+
+Model did pretty well on test set scoring 95% accuracy. 
+
+Ideas which were considered during the development, but were not implemented (indication of potential further are for exploration) 
+- data augmentation (via small rotatio, translation and zoom)  
+- replacing MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
+
+### References 
+link 1
+link 2
+link 3
