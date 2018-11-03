@@ -4,6 +4,11 @@ The purpose of this project is to develop convolutional neural network for writt
 
 ## Introduction 
 
+#### Project structure 
+
+folders
+files
+
 #### Dataset overview
 Training dataset consist of 30,134 examples of written characters divided into 35 classes - 10 digits and 25 letters. 
 
@@ -14,7 +19,7 @@ Each example is a 56x56 black/white image. Pixels are values 0 or 1.
 Training set is provided in form of numpy arrays with 3 136 columns (with pixel values) and one additional vector with class label. 
 
 #### Content of this document 
-1. Data loading, preperation and exploring 
+1. Data loading, exploring and preprocessing the data
 2. CNN modelling
 3. Model evaluation
 
@@ -52,7 +57,7 @@ plt.show()
 ```
 ![Classes](https://github.com/thepr0blem/task/blob/master/pics/data_viz.png) 
 
-### 1.1 Sample images
+### 1.2 Exploring data - samples
 
 ```python
 def plot_samples(X, y):
@@ -64,8 +69,43 @@ def plot_samples(X, y):
             axarr[i, j].imshow(X[n].reshape(56, 56), cmap='gray')
             axarr[i, j].axis('off')
             axarr[i, j].set_title(labels[y[n][0]])
+
+
+plot_samples(X, y)
+```
+![Classes](https://github.com/thepr0blem/task/blob/master/pics/samples.png) 
+
+### 1.3 Preprocessing the data
+#### 1.3.1 Reshaping 
+
+```python
+n_cols = X.shape[1]
+img_size = int(np.sqrt(n_cols))
+no_of_classes = len(np.unique(y, return_counts=True)[0])
+
+X_cnn = X.reshape(X.shape[0], img_size, img_size, 1)
 ```
 
+#### 1.3.2 Split into training and testing set 
+The data is split in two steps. 
+1. Split on training and testing sets in 90:10 proportion. 
+2. Training set is then split on training and validation set in 90:10 proportion - this happens when fitting the model. 
+```python
+X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.1, random_state=42)
+```
 
+#### 1.3.3 Label encoding 
 
+```python
+y_train_cat_cnn = to_categorical(y_train_cnn)
+y_test_cat_cnn = to_categorical(y_test_cnn)
+```
       
+## 2. Defining CNN structure
+- describe the architecture
+- how many conv layers, filters, kernels, padding
+- max pooling, dropout 
+- flatten
+- dense 
+- activation functions, optimizer 
+- output function 
