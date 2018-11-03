@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import pickle
 import seaborn as sns
-import pandas as pd
+import random as rd
 
 # Load the data
 data_dir = r'./data/train_fixed.pkl'
@@ -12,6 +12,8 @@ data = pickle.load(file)
 file.close()
 
 X, y = data
+
+no_of_classes = X.shape[0]
 
 # Labels dictionary
 
@@ -31,12 +33,22 @@ y_classes = sorted([labels[i] for i in y_vec])
 sns.set(style="darkgrid")
 count_plot = sns.countplot(y_classes, palette="Blues_d")
 
-plt.show()
+# plt.show()
 
 # Comment - In the original data set there were 36 classes where one of them (class 30) had only one example
 #           and was overlapped with class 14 (both were letter "N"). Single example from class 30 was moved to
 #           class 14 and class 35 was renamed to 30.
 
+
+def plot_samples(X, y):
+    f, axarr = plt.subplots(3, 3)
+
+    for i in range(3):
+        for j in range(3):
+            n = rd.randint(0, X.shape[1])
+            axarr[i, j].imshow(X[n].reshape(56, 56), cmap='gray')
+            axarr[i, j].axis('off')
+            axarr[i, j].set_title(labels[y[n][0]])
 
 
 def display_n(x, y, n):
