@@ -98,16 +98,8 @@ def gen_missing_data(data):
 
     return np.vstack((X, augmented_req_x)), np.vstack((y, augmented_req_y))
 
-
 # data_new = gen_missing_data(data)
 #
 # output = open(data_dir_aug, 'wb')
 # pickle.dump(data_new, output)
 # output.close()
-
-
-def gen_disp(data_new):
-    for i in range(36):
-        for k in range(1, 1101, 100):
-            print(i)
-            yield display_n(data_by_class(data_new, i)[0], data_by_class(data_new, i)[1], k)
