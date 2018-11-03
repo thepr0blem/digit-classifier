@@ -4,6 +4,14 @@ The purpose of this project is to develop convolutional neural network for writt
 
 ## Introduction 
 
+
++ What technologies did you use (e.g. Sci-kit, TensorFlow, PyTorch etc.)?
++ How did you validate your model? Provide an estimate of the expected
++ accuracy of the classifier.
++ What techniques did you utilize to improve your method (e.g. data
++ transformation, regularization, data augmentation, hyperparameter tuning,
+
+
 #### Project structure 
 
 folders
@@ -16,7 +24,11 @@ There is no class for letter "X".
 
 Each example is a 56x56 black/white image. Pixels are values 0 or 1. 
 
-Training set is provided in form of numpy arrays with 3 136 columns (with pixel values) and one additional vector with class label. 
+Training set is provided in form of numpy arrays with 3,136 columns (with pixel values) and one additional vector with class label. 
+
+**NOTE:** In the original data set there were 36 classes where one of them (class 30) had only one example
+          and was overlapped with class 14 (both were letter "N"). Single example from class 30 was moved to
+          class 14 and class 35 was renamed to 30.
 
 #### Content of this document 
 1. Data loading, exploring and preprocessing the data
@@ -109,11 +121,12 @@ To implement convolutional neural network I used **Keras** API (which is user fr
     - kernel_size - 3 x 3
     - activation - 'relu' 
     - input shape - 4D tensor - (n, 56, 56, 1), where (number of examples, img_size, img_size, no_of_channels) 
+    - padding - 'same'
   - **Conv2D** - conv. layer 
     - filters - 32
     - kernel_size - 3 x 3
     - activation - 'relu' 
-    - input shape - 4D tensor - (n, 56, 56, 1), where (number of examples, img_size, img_size, no_of_channels) 
+    - padding - 'same'
   - **Max_Pooling** - subsampling layer
     - pool_size - (2, 2)
   - **Dropout** - regularization layer
@@ -123,12 +136,12 @@ To implement convolutional neural network I used **Keras** API (which is user fr
     - filters - 32
     - kernel_size - 3 x 3
     - activation - 'relu' 
-    - input shape - 4D tensor - (n, 56, 56, 1), where (number of examples, img_size, img_size, no_of_channels) 
+    - padding - 'same'
   - **Conv2D** - conv. layer 
     - filters - 32
     - kernel_size - 3 x 3
     - activation - 'relu' 
-    - input shape - 4D tensor - (n, 56, 56, 1), where (number of examples, img_size, img_size, no_of_channels) 
+    - padding - 'same'
   - **Max_Pooling** - subsampling layer
     - pool_size - (2, 2)
   - **Dropout** - regularization layer
@@ -144,47 +157,42 @@ To implement convolutional neural network I used **Keras** API (which is user fr
     - activation - softmax
     
 ```python
-def create_model(X_train, y_train, it=1, no_of_filters=32, kern_size=5,
+def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
                  max_p_size=2, drop_perc_conv=0.2, drop_perc_dense=0.4,
-                 dens_size=256, val_split_perc=0.2, no_of_epochs=5,
+                 dens_size=256, val_split_perc=0.2, no_of_epochs=1,
                  optimizer="adam", random_search=False):
-
     """Creates an architecture, train and saves CNN model.
 
     Returns:
         Dictionary with training report history.
     """
 
-    img_size = int(np.sqrt(X_train.shape[1]))
-    num_classes = len(np.unique(y_train, return_counts=True)[0])
-    y_train_cat = to_categorical(y_train)
+    y_train_cat = to_categorical(y)
 
     model = Sequential()
 
     model.add(Conv2D(no_of_filters,
                      kernel_size=(kern_size, kern_size),
                      activation='relu',
-                     input_shape=(img_size, img_size, 1),
+                     input_shape=(56, 56, 1),
                      padding='same'))
 
     model.add(Conv2D(no_of_filters,
                      kernel_size=(kern_size, kern_size),
                      activation='relu',
-                     padding='valid'))
-    model.add(MaxPooling2D(pool_size=(max_p_size, max_p_size)))
+                     padding='same'))
+    model.add(MaxPooling2D((max_p_size, max_p_size)))
     model.add(Dropout(drop_perc_conv))
 
     model.add(Conv2D(2 * no_of_filters,
-                     kernel_size=(kern_size-2, kern_size-2),
+                     kernel_size=(kern_size, kern_size),
                      activation='relu',
-                     input_shape=(img_size, img_size, 1),
                      padding='same'))
     model.add(Conv2D(2 * no_of_filters,
-                     kernel_size=(kern_size-2, kern_size-2),
+                     kernel_size=(kern_size, kern_size),
                      activation='relu',
-                     input_shape=(img_size, img_size, 1),
-                     padding='valid'))
-    model.add(MaxPooling2D(pool_size=(max_p_size, max_p_size)))
+                     padding='same'))
+    model.add(MaxPooling2D((max_p_size, max_p_size)))
     model.add(Dropout(drop_perc_conv))
 
     model.add(Flatten())
@@ -192,7 +200,7 @@ def create_model(X_train, y_train, it=1, no_of_filters=32, kern_size=5,
     model.add(Dense(dens_size, activation='relu'))
     model.add(Dropout(drop_perc_dense))
 
-    model.add(Dense(num_classes, activation='softmax'))
+    model.add(Dense(35, activation='softmax'))
 
     model.compile(optimizer=optimizer,
                   loss='categorical_crossentropy',
@@ -200,28 +208,175 @@ def create_model(X_train, y_train, it=1, no_of_filters=32, kern_size=5,
 
     early_stopping_monitor = EarlyStopping(patience=5)
 
-    history = model.fit(X_train,
+    history = model.fit(X,
                         y_train_cat,
                         validation_split=val_split_perc,
                         epochs=no_of_epochs,
                         callbacks=[early_stopping_monitor],
-                        batch_size=128
-                        )
+                        batch_size=128)
 
     history_dict = history.history
 
     if random_search:
 
-        np.save(r".\random_search\hist\history_dict_{}.npy".format(it), history_dict)
-        model.save(r".\random_search\models\CNN_{}.h5".format(it))
+        np.save(r"./models/random_search/hist/history_dict_{}.npy".format(it), history_dict)
+        model.save(r"./models/random_search/models/CNN_{}.h5".format(it))
 
     else:
 
-        np.save(r".\logs\history_dict_{}.npy".format(it), history_dict)
-        model.save(r".\logs\CNN_model_{}.h5".format(it))
+        np.save(r"./logs/history_dict_{}.npy".format(it), history_dict)
+        model.save(r"./models/CNN_model_{}.h5".format(it))
 
     return history_dict
 ```
 ### 2.2 Hyperparameters tuning
 
-I used random search approach to select set of hyperparameters. 
+I used **random search** approach to select the best set of hyperparameters given time frames nad computational capabilities of my hardware. 
+
+Defining parameters dictionary 
+```python
+parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
+                  "kern_size": [3, 4, 5],
+                  "max_pool": [2, 3],
+                  "dropout_perc": [0.05, 0.1, 0.2, 0.3, 0.4],
+                  "dense_size": [64, 128, 192, 256, 320],
+                  "optimizers": ["adam", "adamax", "nadam", "RMSProp"]
+                  }
+```
+
+Defining the function which will perform random search given above set of hyperparameters. 
+
+The function will: 
+- use ```create model()``` function from above to train n number of models with randomly selected set of parameters
+- it will save all models in ```./models/random_search/models``` 
+- it will save set of parameters and training histories for all iterations in ```./models/random_search/params``` and ```.models/random_search/hist``` accordingly 
+- only 15% of the whole data set will be used as I am looking only for indication which parameters will be the best instead of the ready model 
+
+```python
+
+def run_random_search(X, y, params, no_of_searches=1):
+    """Perform random search on hyper parameters list, saves models and validation accuracies.
+
+    Args:
+        params: Dictionary with hyperparameters for CNN random search.
+        no_of_searches: How many times random search is executed.
+
+    Returns:
+        List of accuracies performed on validation set for each iteration.
+    """
+    val_accs_list = []
+
+    for i in range(no_of_searches):
+        # Creating a tuple for each iteration of random search with selected parameters
+
+        params_dict = {"iteration": i + 1,
+                       "no_of_filters": rd.choice(params["no_of_filters"]),
+                       "kern_size": rd.choice(params["kern_size"]),
+                       "max_pool": rd.choice(params["max_pool"]),
+                       "dropout_perc_conv": rd.choice(params["dropout_perc"]),
+                       "dropout_perc_dens": rd.choice(params["dropout_perc"]),
+                       "dense_size": rd.choice(params["dense_size"]),
+                       "optimizer": rd.choice(params["optimizers"]),
+                       }
+
+        np.save(r"./models/random_search/params/params_dict_{}.npy".format(i), params_dict)
+
+        hist_dict = create_model(X, y,
+                                 it=i + 1,
+                                 no_of_filters=params_dict["no_of_filters"],
+                                 kern_size=params_dict["kern_size"],
+                                 max_p_size=params_dict["max_pool"],
+                                 drop_perc_conv=params_dict["dropout_perc_conv"],
+                                 drop_perc_dense=params_dict["dropout_perc_dens"],
+                                 dens_size=params_dict["dense_size"],
+                                 optimizer=params_dict["optimizer"],
+                                 random_search=True
+                                 )
+
+        val_accs_list.append(hist_dict['val_acc'][-1])
+
+    np.save(r"./models/random_search/val_accs_list.npy", val_accs_list)
+
+    return val_accs_list
+```
+
+Running the search. 
+
+```python
+mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 20)
+```
+
+Loading list with accuracies and printing parameters for the "best" combination from random_search. 
+
+```
+val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
+```
+
+```
+print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(val_accs_list.argmax())))
+```
+
+```
+{'iteration': 1, 'no_of_filters': 8, 'kern_size': 5, 'max_pool': 2, 'dropout_perc_conv': 0.2, 'dropout_perc_dens': 0.1, 'dense_size': 64, 'optimizer': 'adamax'}
+```
+Based on above, training model with given parameters on full training data set.
+
+```python
+mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=5,
+                 max_p_size=2, drop_perc_conv=0.2, drop_perc_dense=0.4,
+                 dens_size=256, val_split_perc=0.2, no_of_epochs=5,
+                 optimizer="adam", random_search=False)
+```
+Model will be saved as models/CNN_model_F.h5
+
+## 3. Model evaluation
+### 3.1 Load model and evaluate on test data set 
+
+```python
+def load_saved_model(path):
+    """Loads model using keras.load_model() function.
+
+    Args:
+        path: Model folder directory.
+        filename: Name of the model file (.h5 file type)
+
+    Returns:
+        Keras model instance.
+    """
+    return load_model(path)
+```
+
+```
+model = mod.load_saved_model(r"./models/CNN_model_F.h5")
+```
+
+```
+score = mod.test_and_score(model, X_test_cnn, y_test_cat_cnn)
+```
+
+```
+score
+Out[6]: [0.9276472181848217, 0.7765057242804743]
+```
+Accuracy on test score is XX %. 
+
+### 3.2 Confusion matrix 
+
+Leveraging ```scikit-learn``` modules we can easily build confusion matrix. 
+
+### 3.3 Accuracy report 
+
+### 3.4 Display exemplary mistakes 
+
+## Conclusions 
+
+Model did pretty well on test set scoring 95% accuracy. 
+
+Ideas which were considered during the development, but were not implemented (indication of potential further are for exploration) 
+- data augmentation (via small rotatio, translation and zoom)  
+- replacing MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
+
+### References 
+link 1
+link 2
+link 3
