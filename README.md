@@ -223,7 +223,7 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
 ```
 ### 2.2 Hyperparameters tuning
 
-I used **random search** approach to select the best set of hyperparameters given time frames nad computational capabilities of my laptop :) 
+I used **random search** approach to select the best set of hyperparameters given time frames nad computational capabilities of my hardware. 
 
 Defining parameters dictionary 
 ```python
@@ -291,3 +291,32 @@ def run_random_search(X, y, params, no_of_searches=1):
 
     return val_accs_list
 ```
+
+Running the search. 
+
+```python
+mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 20)
+```
+
+Loading list with accuracies and printing parameters for the "best" combination from random_search. 
+
+```
+val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
+```
+
+```
+print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(val_accs_list.argmax())))
+```
+
+```
+{'iteration': 1, 'no_of_filters': 8, 'kern_size': 5, 'max_pool': 2, 'dropout_perc_conv': 0.2, 'dropout_perc_dens': 0.1, 'dense_size': 64, 'optimizer': 'adamax'}
+```
+Based on above, training model with given parameters on full training data set.
+
+```python
+mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=5,
+                 max_p_size=2, drop_perc_conv=0.2, drop_perc_dense=0.4,
+                 dens_size=256, val_split_perc=0.2, no_of_epochs=5,
+                 optimizer="adam", random_search=False)
+```
+Model will be saved as models/CNN_F.h5
