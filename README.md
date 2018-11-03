@@ -377,6 +377,7 @@ Ideas which were considered during the development, but were not implemented (in
 - replacing MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
 
 ### References 
+[TEXT TO SHOW](actual URL to navigate)
 link 1
 link 2
 link 3
