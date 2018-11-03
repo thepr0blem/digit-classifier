@@ -362,7 +362,44 @@ Accuracy on test score is XX %.
 
 ### 3.2 Confusion matrix 
 
-Leveraging ```scikit-learn``` modules we can easily build confusion matrix. 
+Leveraging ```scikit-learn``` modules we can easily build confusion matrix, which will show which classes are the most difficult for the model to distinguish between. 
+
+First, we need to classify test examples and pass the predictions to ```confusion_matrix``` together with true labels.  
+```python
+y_pred = pred.predict(X_test_cnn)
+```
+```python
+conf_mat = confusion_matrix(y_test_cnn, y_pred)
+```
+Next, short function for plotting the matrix will be required. I used ```seaborn.heatmap```
+
+```python
+def plot_conf_mat(conf_mat, label_list, normalize=False):
+
+    if normalize:
+
+        conf_mat = conf_mat.astype(float) / conf_mat.sum(axis=1)[:, np.newaxis]
+
+    fmt = '.2f' if normalize else 'd'
+    sns.heatmap(conf_mat, annot=True, fmt=fmt,
+                cmap="Blues", cbar=False, xticklabels=label_list,
+                yticklabels=label_list, robust=True)
+    plt.title('Confusion matrix')
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.show()
+```
+Labels list: 
+```python
+labels_list = [labels[i] for i in range(35)]
+```
+Plotting: 
+```python
+vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
+```
+
+
+
 
 ### 3.3 Accuracy report 
 
