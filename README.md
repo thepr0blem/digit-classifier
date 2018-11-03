@@ -100,7 +100,8 @@ y_train_cat_cnn = to_categorical(y_train_cnn)
 y_test_cat_cnn = to_categorical(y_test_cnn)
 ```
       
-## 2. Defining CNN structure
+## 2. Building CNN 
+### 2.1 Defining CNN architecture
 
 To implement convolutional neural network I used **Keras** API (which is user friendly framework built on top of Tensorflow). I used Sequential model which is ordered hierarchy of layers. Layers are ordered as follows: 
   - **Conv2D** - conv. layer 
@@ -221,4 +222,6 @@ def create_model(X_train, y_train, it=1, no_of_filters=32, kern_size=5,
 
     return history_dict
 ```
+### 2.2 Hyperparameters tuning
 
+I used random search approach to select set of hyperparameters. 
