@@ -46,9 +46,10 @@ def plot_conf_mat(conf_mat, label_list, normalize=False):
 
     if normalize:
 
-        conf_mat = conf_mat.astype(float) / conf_mat.sum(axis=1)
+        conf_mat = conf_mat.astype(float) / conf_mat.sum(axis=1)[:, np.newaxis]
 
-    sns.heatmap(conf_mat, annot=True, fmt='d',
+    fmt = '.2f' if normalize else 'd'
+    sns.heatmap(conf_mat, annot=True, fmt=fmt,
                 cmap="Blues", cbar=False, xticklabels=label_list,
                 yticklabels=label_list, robust=True)
     plt.title('Confusion matrix')

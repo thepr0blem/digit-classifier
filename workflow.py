@@ -51,12 +51,13 @@ y_vec = y.reshape(y.shape[0], )
 
 y_classes = sorted([labels[i] for i in y_vec])
 
-# sns.set(style="darkgrid")
-# count_plot = sns.countplot(y_classes, palette="Blues_d")
-#
-# plt.show()
+plt.figure(1)
+sns.set(style="darkgrid")
+count_plot = sns.countplot(y_classes, palette="Blues_d")
+
 
 # vis.plot_samples(X, y, labels)
+
 
 # 1.3 Preprocessing the data
 # 1.3.1 Reshaping
@@ -109,10 +110,11 @@ val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 
 # 2.2 Confusion matrix
 
-y_pred_2 = pred.predict(X_test_cnn)
+y_pred = pred.predict(X_test_cnn)
 
-conf_mat = confusion_matrix(y_test_cnn, y_pred_2)
+conf_mat = confusion_matrix(y_test_cnn, y_pred)
 
 labels_list = [labels[i] for i in range(35)]
 
-vis.plot_conf_mat(conf_mat, labels_list, normalize=True)
+plt.figure(3)
+vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
