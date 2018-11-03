@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import random as rd
+import seaborn as sns
 
 
 def plot_samples(X, y, labels):
@@ -39,3 +40,18 @@ def display_n(X, y, n):
     plt.imshow(X[n].reshape(img_size, img_size), cmap='gray')
 
     return y[n][0]
+
+
+def plot_conf_mat(conf_mat, label_list, normalize=False):
+
+    if normalize:
+
+        conf_mat = conf_mat.astype(float) / conf_mat.sum(axis=1)
+
+    sns.heatmap(conf_mat, annot=True, fmt='d',
+                cmap="Blues", cbar=False, xticklabels=label_list,
+                yticklabels=label_list, robust=True)
+    plt.title('Confusion matrix')
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.show()

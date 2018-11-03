@@ -5,15 +5,15 @@
 import numpy as np
 import pickle
 import seaborn as sns
+from matplotlib import pyplot as plt
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix
 from keras.utils import to_categorical
 
-from src import visualization as vis
 from src import modelling as mod
-from src import predict as pred
-
+from src import visualization as vis
+import predict as pred
 
 # 1 Loading and exploring the data
 # 1.1 Load the data
@@ -34,6 +34,15 @@ labels = {0: "6", 1: "P", 2: "O", 3: "V", 4: "W", 5: "3", 6: "A",
           21: "C", 22: "E", 23: "J", 24: "5", 25: "1", 26: "S", 27: "2",
           28: "F", 29: "Z", 30: "U", 31: "Q", 32: "M", 33: "B", 34: "D"}
 
+# labels_new = {0: "0", 1: "1", 2: "2", 3: "3", 4: "4", 5: "5", 6: "6",
+#               7: "7", 8: "8", 9: "9", 10: "A", 11: "B", 12: "C", 13: "D",
+#               14: "E", 15: "F", 16: "G", 17: "H", 18: "I", 19: "J", 20: "K",
+#               21: "L", 22: "M", 23: "N", 24: "O", 25: "P", 26: "Q", 27: "R",
+#               28: "S", 29: "T", 30: "U", 31: "V", 32: "W", 33: "Y", 34: "Z"}
+#
+# inv_new = {v: k for k, v in labels_new.items()}
+#
+# y = np.array([inv_new[labels[i]] for i in list(y.reshape(1, len(y))[0])]).reshape(y.shape[0], 1)
 
 # 1.2 Exploring data - sample
 # Plotting number of classes
@@ -42,9 +51,9 @@ y_vec = y.reshape(y.shape[0], )
 
 y_classes = sorted([labels[i] for i in y_vec])
 
-sns.set(style="darkgrid")
+# sns.set(style="darkgrid")
 # count_plot = sns.countplot(y_classes, palette="Blues_d")
-
+#
 # plt.show()
 
 # vis.plot_samples(X, y, labels)
@@ -94,14 +103,16 @@ val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 # 3 Model evaluation
 # 2.1 Load model and evaluate on test data set
 
-model = mod.load_saved_model(r"./models/CNN_1.h5")
+# model = mod.load_saved_model(r"./models/CNN_1.h5")
 
 # score = mod.test_and_score(model, X_test_cnn, y_test_cat_cnn)
 
 # 2.2 Confusion matrix
 
-y_pred = pred.predict(X_test_cnn)
+y_pred_2 = pred.predict(X_test_cnn)
 
-conf_mat = confusion_matrix(y_test_cnn, y_pred)
+conf_mat = confusion_matrix(y_test_cnn, y_pred_2)
 
-print(conf_mat)
+labels_list = [labels[i] for i in range(35)]
+
+vis.plot_conf_mat(conf_mat, labels_list, normalize=True)
