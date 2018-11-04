@@ -390,10 +390,10 @@ score = model.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=32)
 ```
 
 ```
-score
-Out[6]: [0.9276472181848217, 0.7765057242804743]
+print("Test set accuracy {}%".format(np.round(score[1]*100), 3))
+Test set accuracy 95.0%
 ```
-Accuracy on test score is XX %. 
+Accuracy on test score is 95%. 
 
 ### 4.2 Confusion matrix 
 
@@ -432,7 +432,7 @@ Plotting:
 ```python
 vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
 ```
-![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat.png) 
+![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat_new.png) 
 
 ### 4.3 Accuracy report 
 
@@ -444,36 +444,42 @@ class_rep = classification_report(y_test_cnn, y_pred, target_names=labels_list)
 ```python
 print(class_rep)
              precision    recall  f1-score   support
-          6       0.34      0.96      0.51        25
-          P       0.78      0.88      0.83        67
-          O       0.76      0.62      0.69       400
-          V       0.88      0.75      0.81       269
-          W       0.76      0.91      0.82       153
-          3       0.71      0.80      0.76        46
-          A       0.97      0.81      0.88       485
-          8       0.59      0.86      0.70        22
-          T       0.96      0.89      0.92       244
-          I       0.17      0.37      0.23        60
-          0       0.18      0.33      0.23        82
-          9       0.60      0.88      0.71        32
-          H       0.55      0.76      0.64        94
-          R       0.85      0.83      0.84       412
-          N       0.92      0.82      0.87       640
-          7       0.76      0.90      0.83        42
-          K       0.68      0.64      0.66       138
-          L       0.87      0.91      0.89       172
-          G       0.75      0.90      0.82        91
-          4       0.37      0.89      0.53        28
-          Y       0.82      0.70      0.75        83
-          C       0.76      0.89      0.82       103
-          E       0.95      0.85      0.90       438
-          J       0.45      0.88      0.60        17
-          5       0.33      0.71      0.45        21
-          1       0.78      0.56      0.65       283
-          S       0.92      0.80      0.85       246
-          2       0.24      0.39      0.30        31
-          F       0.77      0.84      0.80        49
-          Z       0.76      0.72      0.74       157
+          6       0.74      0.80      0.77        25
+          P       0.94      0.94      0.94        67
+          O       0.81      0.97      0.88       400
+          V       0.95      0.97      0.96       269
+          W       0.98      0.98      0.98       153
+          3       1.00      0.98      0.99        46
+          A       0.99      1.00      0.99       485
+          8       1.00      0.91      0.95        22
+          T       1.00      1.00      1.00       244
+          I       0.50      0.05      0.09        60
+          0       0.40      0.02      0.05        82
+          9       0.97      0.91      0.94        32
+          H       1.00      0.96      0.98        94
+          R       0.99      0.98      0.99       412
+          N       0.99      0.99      0.99       640
+          7       1.00      0.95      0.98        42
+          K       0.96      0.96      0.96       138
+          L       0.97      0.97      0.97       172
+          G       0.95      0.92      0.94        91
+          4       0.89      0.89      0.89        28
+          Y       0.98      0.95      0.96        83
+          C       0.95      0.95      0.95       103
+          E       0.99      1.00      0.99       438
+          J       0.88      0.82      0.85        17
+          5       0.78      0.86      0.82        21
+          1       0.83      0.99      0.90       283
+          S       0.98      0.97      0.97       246
+          2       0.61      0.71      0.66        31
+          F       0.96      0.98      0.97        49
+          Z       0.94      0.90      0.92       157
+          U       0.96      0.96      0.96       406
+          Q       1.00      0.94      0.97        31
+          M       0.97      0.98      0.97       210
+          B       0.98      0.97      0.98       122
+          D       0.95      0.96      0.95       328
+avg / total       0.94      0.95      0.94      6027
 ```
 As expected, the lowest accuracy occurs in characters which might be easily mistaken like "0" vs "O", "i" vs "1" etc. 
 
