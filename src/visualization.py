@@ -19,7 +19,7 @@ def plot_samples(X, y, labels):
 
     for i in range(3):
         for j in range(3):
-            n = rd.randint(0, X.shape[1])
+            n = rd.randint(0, X.shape[0])
             plarr[i, j].imshow(X[n].reshape(56, 56), cmap='gray')
             plarr[i, j].axis('off')
             plarr[i, j].set_title(labels[y[n][0]])
@@ -58,7 +58,7 @@ def plot_conf_mat(conf_mat, label_list, normalize=False):
     plt.show()
 
 
-def display_errors(X, y_true, y_pred):
+def display_errors(X, y_true, y_pred, labels):
     """This function shows 9 wrongly classified images (randomly chosen)
     with their predicted and real labels """
 
@@ -69,8 +69,9 @@ def display_errors(X, y_true, y_pred):
     y_pred_errors = y_pred[errors]
 
     fig, ax = plt.subplots(3, 3, sharex=True, sharey=True)
-    for row in range(3):
-        for col in range(3):
+    for i in range(3):
+        for j in range(3):
             n = rd.randint(0, len(X_errors))
-            ax[row, col].imshow(X_errors[n])
-            ax[row, col].set_title("Predicted label :{}\nTrue label :{}".format(y_pred_errors[n], y_true_errors[n]))
+            ax[i, j].imshow(X_errors[n].reshape(56, 56), cmap='gray')
+            ax[i, j].set_title("Predicted label :{}\nTrue label :{}"
+                               .format(labels[y_pred_errors[n][0]], labels[y_true_errors[n][0]]))

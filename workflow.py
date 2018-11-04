@@ -127,3 +127,4 @@ print(class_rep)
 
 # 3.4 Plot sample wrong classifications
 
+vis.display_errors(X_test_cnn, y_test_cnn, y_pred, labels)
