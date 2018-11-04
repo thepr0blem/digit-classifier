@@ -1,16 +1,23 @@
 # CNN Implementation using Keras
 
+## General overview 
+
 The purpose of this project is to develop convolutional neural network for written characters classification. 
 
-## Introduction 
+#### Technologies used: 
+```Keras``` (framework based on ```Tensorflow```) 
 
+#### Validation:
+Multiple tools provided in ```scikit-learn``` library:
+- random division of the sample on training, validation and testing sets
+- confusion matrix and classification report 
 
-+ What technologies did you use (e.g. Sci-kit, TensorFlow, PyTorch etc.)?
-+ How did you validate your model? Provide an estimate of the expected
-+ accuracy of the classifier.
-+ What techniques did you utilize to improve your method (e.g. data
-+ transformation, regularization, data augmentation, hyperparameter tuning,
-
+#### Techniques for accuracy improvement:
+Estimated expected accuracy of the classifier: 95%. Based on model performance calculated from testing set accuracy. 
+Techniques: 
+- regularization (via Dropout layers) 
+- hyperparameter tuning (via Random Search) 
+- callbacks: Early stopping, ReduceLROnPlateau 
 
 #### Project structure 
 
@@ -26,9 +33,9 @@ Each example is a 56x56 black/white image. Pixels are values 0 or 1.
 
 Training set is provided in form of numpy arrays with 3,136 columns (with pixel values) and one additional vector with class label. 
 
-**NOTE:** In the original data set there were 36 classes where one of them (class 30) had only one example
-          and was overlapped with class 14 (both were letter "N"). Single example from class 30 was moved to
-          class 14 and class 35 was renamed to 30.
+**NOTE:** In the original data set there were 36 classes and one of them (class #30) had only one example.
+          This class was overlapping with class #14 (both were letter "N"). Single example from class #30 was moved to
+          class #14 and class #35 was renamed to #30.
 
 #### Content of this document 
 1. Data loading, exploring and preprocessing the data
