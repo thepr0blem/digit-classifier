@@ -92,16 +92,16 @@ y_test_cat_cnn = to_categorical(y_test_cnn)
 #
 # mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 20)
 #
-# val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
+val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 
 # Print parameters with the highes val_accuracy
 
-# print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(val_accs_list.argmax())))
+print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(val_accs_list.argmax())))
 
-mod.create_model(X_train_cnn, y_train_cnn, it="77", no_of_filters=32, kern_size=3,
-                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
-                 dens_size=156, val_split_perc=0.1, no_of_epochs=30,
-                 optimizer="adam", random_search=False)
+# mod.create_model(X_train_cnn, y_train_cnn, it="77", no_of_filters=32, kern_size=3,
+#                  max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
+#                  dens_size=156, val_split_perc=0.1, no_of_epochs=30,
+#                  optimizer="adam", random_search=False)
 
 
 # 3 Model evaluation
