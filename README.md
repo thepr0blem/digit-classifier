@@ -432,7 +432,7 @@ Plotting:
 ```python
 vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
 ```
-![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat.png) 
+![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat_new.png) 
 
 ### 4.3 Accuracy report 
 
