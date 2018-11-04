@@ -1,30 +1,44 @@
 # CNN Implementation using Keras
 
-## General overview 
-
 The purpose of this project is to develop convolutional neural network for written characters classification. 
 
-#### Technologies used: 
+### Content of this document 
+1. General overview
+2. Data loading, exploring and preprocessing the data
+3. CNN modelling
+4. Model evaluation
+
+## 1. General overview 
+
+### 1.1 Technologies used: 
 ```Keras``` (framework based on ```Tensorflow```) 
 
-#### Validation:
+### 1.2 Validation:
 Multiple tools provided in ```scikit-learn``` library:
 - random division of the sample on training, validation and testing sets
 - confusion matrix and classification report 
 
-#### Techniques for accuracy improvement:
+### 1.3 Techniques for accuracy improvement:
 Estimated expected accuracy of the classifier: 95%. Based on model performance calculated from testing set accuracy. 
 Techniques: 
 - regularization (via Dropout layers) 
 - hyperparameter tuning (via Random Search) 
 - callbacks: Early stopping, ReduceLROnPlateau 
 
-#### Project structure 
+### 1.4 Project structure 
 
-folders
-files
-
-#### Dataset overview
+```
+├── data                    # Data sets
+├── logs                    # Training history logs 
+├── models                  # Trained models 
+├── pics                    # Pictures/Visualizations 
+├── src                     # Source files 
+├── workflow.py             # Code for workflow as presented in README
+├── predict.py              # Function for new data classification 
+├── requirments.txt         # Required libraries
+└── README.md                 
+```
+### 1.5 Dataset overview
 Training dataset consist of 30,134 examples of written characters divided into 35 classes - 10 digits and 25 letters. 
 
 There is no class for letter "X". 
@@ -37,14 +51,15 @@ Training set is provided in form of numpy arrays with 3,136 columns (with pixel 
           This class was overlapping with class #14 (both were letter "N"). Single example from class #30 was moved to
           class #14 and class #35 was renamed to #30.
 
-#### Content of this document 
-1. Data loading, exploring and preprocessing the data
-2. CNN modelling
-3. Model evaluation
+### 1.6 How to USE
 
-## 1. Loading and exploring the data
+#### Predict
 
-### 1.1 Loading the data
+
+
+## 2. Loading and exploring the data
+
+### 2.1 Loading the data
 ```python
 # Load the data
 data_dir = r'./data/train_fixed.pkl'
@@ -63,7 +78,7 @@ labels = {0: "6", 1: "P", 2: "O", 3: "V", 4: "W", 5: "3", 6: "A",
           21: "C", 22: "E", 23: "J", 24: "5", 25: "1", 26: "S", 27: "2",
           28: "F", 29: "Z", 30: "U", 31: "Q", 32: "M", 33: "B", 34: "D"}
 ```  
-### 1.2 Exploring data - samples
+### 2.2 Exploring data - samples
 Plotting classes distribution
 ```python
 y_vec = y.reshape(y.shape[0], )
@@ -93,8 +108,8 @@ vis.plot_samples(X, y)
 ```
 ![Classes](https://github.com/thepr0blem/task/blob/master/pics/samples.png) 
 
-### 1.3 Preprocessing the data
-#### 1.3.1 Reshaping 
+### 2.3 Preprocessing the data
+#### 2.3.1 Reshaping 
 
 ```python
 n_cols = X.shape[1]
@@ -104,7 +119,7 @@ no_of_classes = len(np.unique(y, return_counts=True)[0])
 X_cnn = X.reshape(X.shape[0], img_size, img_size, 1)
 ```
 
-#### 1.3.2 Split into training and testing set 
+#### 2.3.2 Split into training and testing set 
 The data is split in two steps. 
 1. Split on training and testing sets in 90:10 proportion. 
 2. Training set is then split on training and validation set in 90:10 proportion - this happens when fitting the model. 
@@ -112,15 +127,15 @@ The data is split in two steps.
 X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.1, random_state=42)
 ```
 
-#### 1.3.3 Label encoding 
+#### 2.3.3 Label encoding 
 
 ```python
 y_train_cat_cnn = to_categorical(y_train_cnn)
 y_test_cat_cnn = to_categorical(y_test_cnn)
 ```
       
-## 2. Building CNN 
-### 2.1 Defining CNN architecture
+## 3. Building CNN 
+### 3.1 Defining CNN architecture
 
 To implement convolutional neural network I used **Keras** API (which is user friendly framework built on top of Tensorflow). I used Sequential model which is ordered hierarchy of layers. Layers are ordered as follows: 
   - **Conv2D** - conv. layer 
@@ -236,7 +251,7 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
 
     return history_dict
 ```
-### 2.2 Hyperparameters tuning
+### 3.2 Hyperparameters tuning
 
 I used **random search** approach to select the best set of hyperparameters given time frames nad computational capabilities of my hardware. 
 
@@ -336,8 +351,8 @@ mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=5
 ```
 Model will be saved as models/CNN_model_F.h5
 
-## 3. Model evaluation
-### 3.1 Load model and evaluate on test data set 
+## 4. Model evaluation
+### 4.1 Load model and evaluate on test data set 
 
 ```python
 def load_saved_model(path):
@@ -367,7 +382,7 @@ Out[6]: [0.9276472181848217, 0.7765057242804743]
 ```
 Accuracy on test score is XX %. 
 
-### 3.2 Confusion matrix 
+### 4.2 Confusion matrix 
 
 Leveraging ```scikit-learn``` modules we can easily build confusion matrix, which will show which classes are the most difficult for the model to distinguish between. 
 
@@ -406,7 +421,7 @@ vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
 ```
 ![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat.png) 
 
-### 3.3 Accuracy report 
+### 4.3 Accuracy report 
 
 Another interesting tool provided by ```scikit-learn``` and useful while evaluating any classifier is ```classification_report``` 
 
@@ -449,7 +464,7 @@ print(class_rep)
 ```
 As expected, the lowest accuracy occurs in characters which might be easily mistaken like "0" vs "O", "i" vs "1" etc. 
 
-### 3.4 Display exemplary mistakes 
+### 4.4 Display exemplary mistakes 
 
 Define ```display_errors()``` function. 
 
@@ -484,8 +499,6 @@ Ideas which were considered during the development, but were not implemented (in
 - replacing MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
 
 ### References 
-[TEXT TO SHOW](actual URL to navigate)
-
 https://www.kaggle.com/cdeotte/how-to-choose-cnn-architecture-mnist
 
 https://www.kaggle.com/yassineghouzam/introduction-to-cnn-keras-0-997-top-6/notebook
