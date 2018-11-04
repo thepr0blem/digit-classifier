@@ -3,14 +3,13 @@ import random as rd
 
 from keras import Sequential
 from keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
-from keras.callbacks import EarlyStopping
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.utils import to_categorical
-from keras.models import load_model
 
 
 def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
                  max_p_size=2, drop_perc_conv=0.2, drop_perc_dense=0.4,
-                 dens_size=256, val_split_perc=0.2, no_of_epochs=1,
+                 dens_size=256, val_split_perc=0.2, no_of_epochs=5,
                  optimizer="adam", random_search=False):
     """Creates an architecture, train and saves CNN model.
 
@@ -58,13 +57,14 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
                   metrics=['accuracy'])
 
     early_stopping_monitor = EarlyStopping(patience=5)
+    rlrop = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1, min_lr=0.00001)
 
     history = model.fit(X,
                         y_train_cat,
                         validation_split=val_split_perc,
                         epochs=no_of_epochs,
-                        callbacks=[early_stopping_monitor],
-                        batch_size=128)
+                        callbacks=[early_stopping_monitor, rlrop],
+                        batch_size=64)
 
     history_dict = history.history
 
@@ -127,29 +127,3 @@ def run_random_search(X, y, params, no_of_searches=1):
     return val_accs_list
 
 
-def load_saved_model(path):
-    """Loads model using keras.load_model() function.
-
-    Args:
-        path: Model folder directory.
-        filename: Name of the model file (.h5 file type)
-
-    Returns:
-        Keras model instance.
-    """
-    return load_model(path)
-
-
-def test_and_score(model, X_test, y_test):
-    """Evaluates model on a given data set.
-
-    Args:
-        model: Instance of CNN model
-        X_test: Testing data set.
-        y_test: Labels of testing data set.
-
-    Returns:
-        Returns score.
-    """
-    score = model.evaluate(X_test, y_test, batch_size=64)
-    return score

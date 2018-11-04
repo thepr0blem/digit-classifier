@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 from keras.utils import to_categorical
+import keras
 
 from src import modelling as mod
 from src import visualization as vis
@@ -81,16 +82,16 @@ y_test_cat_cnn = to_categorical(y_test_cnn)
 # 2.1 Defining CNN architecture
 # 2.2 Hyperparameter tuning
 
-parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
-                  "kern_size": [3, 4, 5],
-                  "max_pool": [2, 3],
-                  "dropout_perc": [0.05, 0.1, 0.2, 0.3, 0.4],
-                  "dense_size": [64, 128, 192, 256, 320],
-                  "optimizers": ["adam", "adamax", "nadam", "RMSProp"]
-                  }
-
-# mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 3)
-
+# parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
+#                   "kern_size": [3, 4, 5, 6, 7],
+#                   "max_pool": [2, 3],
+#                   "dropout_perc": [0.1, 0.2, 0.3, 0.4, 0.5],
+#                   "dense_size": [64, 128, 192, 256, 512, 1024],
+#                   "optimizers": ["adam", "adamax", "nadam", "RMSProp"]
+#                   }
+#
+# mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 20)
+#
 # val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 
 # Print parameters with the highes val_accuracy
@@ -99,27 +100,27 @@ parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
 
 # mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=5,
 #                  max_p_size=2, drop_perc_conv=0.2, drop_perc_dense=0.4,
-#                  dens_size=256, val_split_perc=0.99, no_of_epochs=5,
+#                  dens_size=256, val_split_perc=0.1, no_of_epochs=5,
 #                  optimizer="adam", random_search=False)
 
 
 # 3 Model evaluation
 # 3.1 Load model and evaluate on test data set
 
-# model = mod.load_saved_model(r"./models/CNN_1.h5")
+model = keras.models.load_model(r"./models/CNN_FF_2.h5")
 
-# score = mod.test_and_score(model, X_test_cnn, y_test_cat_cnn)
+# score = model.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
 
 # 3.2 Confusion matrix
 
-y_pred = pred.predict(X_test)
+y_pred = pred.predict(X_test_cnn)
 
 conf_mat = confusion_matrix(y_test_cnn, y_pred)
 
 labels_list = [labels[i] for i in range(35)]
 
-# plt.figure(3)
-# vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
+plt.figure(3)
+vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
 
 # 3.3 Classification report
 
