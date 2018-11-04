@@ -177,9 +177,9 @@ To implement convolutional neural network I used **Keras** API (which is user fr
     - activation - 'relu' 
     - padding - 'same'
   - **Max_Pooling** - subsampling layer
-    - pool_size - (2, 2)
+    - pool_size - (3, 3)
   - **Dropout** - regularization layer
-    - dropout_percentage - 20%
+    - dropout_percentage - 30%
 
   - **Conv2D** - conv. layer 
     - filters - 32
@@ -192,23 +192,25 @@ To implement convolutional neural network I used **Keras** API (which is user fr
     - activation - 'relu' 
     - padding - 'same'
   - **Max_Pooling** - subsampling layer
-    - pool_size - (2, 2)
+    - pool_size - (3, 3)
   - **Dropout** - regularization layer
-    - dropout_percentage - 20%
+    - dropout_percentage - 30%
  
   - **Flatten** - flattening input for dense layers input
   - **Dense** - regular dense layer
     - number of neurons - 128
     - activation - 'relu'
+  - **Dropout** - regularization layer
+    - dropout_percentage - 20%
    
   - **Dense** - final layer
     - units - number of classes
     - activation - softmax
     
 ```python
-def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
-                 max_p_size=2, drop_perc_conv=0.2, drop_perc_dense=0.4,
-                 dens_size=256, val_split_perc=0.2, no_of_epochs=1,
+def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
+                 dens_size=128, val_split_perc=0.1, no_of_epochs=5,
                  optimizer="adam", random_search=False):
     """Creates an architecture, train and saves CNN model.
 
@@ -233,11 +235,11 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
     model.add(MaxPooling2D((max_p_size, max_p_size)))
     model.add(Dropout(drop_perc_conv))
 
-    model.add(Conv2D(2 * no_of_filters,
+    model.add(Conv2D(no_of_filters,
                      kernel_size=(kern_size, kern_size),
                      activation='relu',
                      padding='same'))
-    model.add(Conv2D(2 * no_of_filters,
+    model.add(Conv2D(no_of_filters,
                      kernel_size=(kern_size, kern_size),
                      activation='relu',
                      padding='same'))
@@ -256,12 +258,13 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
                   metrics=['accuracy'])
 
     early_stopping_monitor = EarlyStopping(patience=5)
+    rlrop = ReduceLROnPlateau(monitor='val_acc', factor=0.5, patience=3, verbose=1, min_lr=0.00001)
 
     history = model.fit(X,
                         y_train_cat,
                         validation_split=val_split_perc,
                         epochs=no_of_epochs,
-                        callbacks=[early_stopping_monitor],
+                        callbacks=[early_stopping_monitor, rlrop],
                         batch_size=128)
 
     history_dict = history.history
@@ -285,10 +288,10 @@ I used **random search** approach to select the best set of hyperparameters give
 Defining parameters dictionary 
 ```python
 parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
-                  "kern_size": [3, 4, 5],
+                  "kern_size": [3, 4, 5, 6, 7],
                   "max_pool": [2, 3],
-                  "dropout_perc": [0.05, 0.1, 0.2, 0.3, 0.4],
-                  "dense_size": [64, 128, 192, 256, 320],
+                  "dropout_perc": [0.1, 0.2, 0.3, 0.4, 0.5],
+                  "dense_size": [64, 128, 192, 256, 512, 1024],
                   "optimizers": ["adam", "adamax", "nadam", "RMSProp"]
                   }
 ```
@@ -366,23 +369,23 @@ print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(val_acc
 ```
 
 ```
-{'iteration': 1, 'no_of_filters': 8, 'kern_size': 5, 'max_pool': 2, 'dropout_perc_conv': 0.2, 'dropout_perc_dens': 0.1, 'dense_size': 64, 'optimizer': 'adamax'}
+{'iteration': 13, 'no_of_filters': 64, 'kern_size': 7, 'max_pool': 3, 'dropout_perc_conv': 0.3, 'dropout_perc_dens': 0.2, 'dense_size': 128, 'optimizer': 'nadam'}
 ```
 Based on above, training model with given parameters on full training data set.
 
 ```python
-mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=5,
-                 max_p_size=2, drop_perc_conv=0.2, drop_perc_dense=0.4,
-                 dens_size=256, val_split_perc=0.2, no_of_epochs=5,
+mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=3,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
+                 dens_size=128, val_split_perc=0.1, no_of_epochs=30,
                  optimizer="adam", random_search=False)
 ```
-Model will be saved as models/CNN_model_F.h5
+Model will be saved as ```models/CNN_v_F.h5```
 
 ## 4. Model evaluation
 ### 4.1 Load model and evaluate on test data set 
 
 ```
-model = load_saved_model(r"./models/CNN_model_F.h5")
+model = load_saved_model(r"./models/CNN_v_F.h5")
 ```
 
 ```
