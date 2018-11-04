@@ -501,7 +501,7 @@ def display_errors(X, y_true, y_pred, labels):
                                .format(labels[y_pred_errors[n][0]], labels[y_true_errors[n][0]]))
 ```
 
-![Conf_mat](PUT A LINK TO EXEMPLARY ERRORS SCREENSHOT) 
+![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/sample_errors.png) 
 
 ## Conclusions 
 
@@ -509,7 +509,7 @@ Model did pretty well on test set scoring 95% accuracy.
 
 Ideas which were considered during the development, but were not implemented (indication of potential further are for exploration) 
 - data augmentation (via small rotatio, translation and zoom)  
-- replacinga MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
+- replacing MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
 
 ### References 
 https://www.kaggle.com/cdeotte/how-to-choose-cnn-architecture-mnist
