@@ -456,6 +456,7 @@ Ideas which were considered during the development, but were not implemented (in
 
 ### References 
 [TEXT TO SHOW](actual URL to navigate)
+
 https://www.kaggle.com/cdeotte/how-to-choose-cnn-architecture-mnist
 
 https://www.kaggle.com/yassineghouzam/introduction-to-cnn-keras-0-997-top-6/notebook
