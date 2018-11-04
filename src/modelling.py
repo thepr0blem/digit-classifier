@@ -7,9 +7,9 @@ from keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.utils import to_categorical
 
 
-def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
-                 max_p_size=2, drop_perc_conv=0.2, drop_perc_dense=0.4,
-                 dens_size=256, val_split_perc=0.2, no_of_epochs=5,
+def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
+                 dens_size=128, val_split_perc=0.1, no_of_epochs=30,
                  optimizer="adam", random_search=False):
     """Creates an architecture, train and saves CNN model.
 
@@ -34,11 +34,11 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
     model.add(MaxPooling2D((max_p_size, max_p_size)))
     model.add(Dropout(drop_perc_conv))
 
-    model.add(Conv2D(2 * no_of_filters,
+    model.add(Conv2D(no_of_filters,
                      kernel_size=(kern_size, kern_size),
                      activation='relu',
                      padding='same'))
-    model.add(Conv2D(2 * no_of_filters,
+    model.add(Conv2D(no_of_filters,
                      kernel_size=(kern_size, kern_size),
                      activation='relu',
                      padding='same'))
@@ -57,7 +57,7 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=5,
                   metrics=['accuracy'])
 
     early_stopping_monitor = EarlyStopping(patience=5)
-    rlrop = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=3, verbose=1, min_lr=0.00001)
+    rlrop = ReduceLROnPlateau(monitor='val_acc', factor=0.5, patience=3, verbose=1, min_lr=0.00001)
 
     history = model.fit(X,
                         y_train_cat,

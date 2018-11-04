@@ -1,5 +1,4 @@
 from keras.models import load_model
-import numpy as np
 
 
 def predict(input_data):
@@ -11,7 +10,7 @@ def predict(input_data):
     Returns:
         output_data: (n x 1) array with class labels
     """
-    model_in = load_model(r"./models/CNN_FF_2.h5")
+    model_in = load_model(r"./models/CNN_v_F.h5")
 
     prediction = model_in.predict(input_data.reshape(input_data.shape[0], 56, 56, 1))
 

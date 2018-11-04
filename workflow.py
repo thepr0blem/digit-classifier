@@ -98,16 +98,16 @@ y_test_cat_cnn = to_categorical(y_test_cnn)
 
 # print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(val_accs_list.argmax())))
 
-# mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=5,
-#                  max_p_size=2, drop_perc_conv=0.2, drop_perc_dense=0.4,
-#                  dens_size=256, val_split_perc=0.1, no_of_epochs=5,
-#                  optimizer="adam", random_search=False)
+mod.create_model(X_train_cnn, y_train_cnn, it="77", no_of_filters=32, kern_size=3,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
+                 dens_size=156, val_split_perc=0.1, no_of_epochs=30,
+                 optimizer="adam", random_search=False)
 
 
 # 3 Model evaluation
 # 3.1 Load model and evaluate on test data set
 
-model = keras.models.load_model(r"./models/CNN_FF_2.h5")
+# model = keras.models.load_model(r"./models/CNN_v_F.h5")
 
 # score = model.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
 
@@ -129,5 +129,4 @@ class_rep = classification_report(y_test_cnn, y_pred, target_names=labels_list)
 print(class_rep)
 
 # 3.4 Plot sample wrong classifications
-
 vis.display_errors(X_test_cnn, y_test_cnn, y_pred, labels)
