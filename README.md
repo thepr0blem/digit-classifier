@@ -444,7 +444,29 @@ As expected, the lowest accuracy occurs in characters which might be easily mist
 
 ### 3.4 Display exemplary mistakes 
 
+Define ```display_errors()``` function. 
 
+```python
+def display_errors(X, y_true, y_pred, labels):
+    """This function shows 9 wrongly classified images (randomly chosen)
+    with their predicted and real labels """
+
+    errors = (y_true - y_pred != 0).reshape(len(y_pred), )
+
+    X_errors = X[errors]
+    y_true_errors = y_true[errors]
+    y_pred_errors = y_pred[errors]
+
+    fig, ax = plt.subplots(3, 3, sharex=True, sharey=True)
+    for i in range(3):
+        for j in range(3):
+            n = rd.randint(0, len(X_errors))
+            ax[i, j].imshow(X_errors[n].reshape(56, 56), cmap='gray')
+            ax[i, j].set_title("Predicted label :{}\nTrue label :{}"
+                               .format(labels[y_pred_errors[n][0]], labels[y_true_errors[n][0]]))
+```
+
+![Conf_mat](PUT A LINK TO EXEMPLARY ERRORS SCREENSHOT) 
 
 ## Conclusions 
 
