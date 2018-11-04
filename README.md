@@ -53,6 +53,16 @@ Training set is provided in form of numpy arrays with 3,136 columns (with pixel 
 
 ### 1.6 How to USE
 
+#### Imports
+
+Required technologies are listed in ```requirments.txt``` file.
+
+Imports 
+
+***IMPORTS CODE***
+
+#### Workflow
+
 #### Predict
 
 ```python
@@ -371,26 +381,12 @@ Model will be saved as models/CNN_model_F.h5
 ## 4. Model evaluation
 ### 4.1 Load model and evaluate on test data set 
 
-```python
-def load_saved_model(path):
-    """Loads model using keras.load_model() function.
-
-    Args:
-        path: Model folder directory.
-        filename: Name of the model file (.h5 file type)
-
-    Returns:
-        Keras model instance.
-    """
-    return load_model(path)
+```
+model = load_saved_model(r"./models/CNN_model_F.h5")
 ```
 
 ```
-model = mod.load_saved_model(r"./models/CNN_model_F.h5")
-```
-
-```
-score = mod.test_and_score(model, X_test_cnn, y_test_cat_cnn)
+score = model.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=32)
 ```
 
 ```
@@ -513,7 +509,7 @@ Model did pretty well on test set scoring 95% accuracy.
 
 Ideas which were considered during the development, but were not implemented (indication of potential further are for exploration) 
 - data augmentation (via small rotatio, translation and zoom)  
-- replacing MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
+- replacinga MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
 
 ### References 
 https://www.kaggle.com/cdeotte/how-to-choose-cnn-architecture-mnist
