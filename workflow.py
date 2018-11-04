@@ -8,7 +8,7 @@ import seaborn as sns
 from matplotlib import pyplot as plt
 
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report
 from keras.utils import to_categorical
 
 from src import modelling as mod
@@ -51,9 +51,9 @@ y_vec = y.reshape(y.shape[0], )
 
 y_classes = sorted([labels[i] for i in y_vec])
 
-plt.figure(1)
-sns.set(style="darkgrid")
-count_plot = sns.countplot(y_classes, palette="Blues_d")
+# plt.figure(1)
+# sns.set(style="darkgrid")
+# count_plot = sns.countplot(y_classes, palette="Blues_d")
 
 
 # vis.plot_samples(X, y, labels)
@@ -102,13 +102,13 @@ val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 
 
 # 3 Model evaluation
-# 2.1 Load model and evaluate on test data set
+# 3.1 Load model and evaluate on test data set
 
 # model = mod.load_saved_model(r"./models/CNN_1.h5")
 
 # score = mod.test_and_score(model, X_test_cnn, y_test_cat_cnn)
 
-# 2.2 Confusion matrix
+# 3.2 Confusion matrix
 
 y_pred = pred.predict(X_test_cnn)
 
@@ -116,5 +116,14 @@ conf_mat = confusion_matrix(y_test_cnn, y_pred)
 
 labels_list = [labels[i] for i in range(35)]
 
-plt.figure(3)
-vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
+# plt.figure(3)
+# vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
+
+# 3.3 Classification report
+
+class_rep = classification_report(y_test_cnn, y_pred, target_names=labels_list)
+
+print(class_rep)
+
+# 3.4 Plot sample wrong classifications
+
