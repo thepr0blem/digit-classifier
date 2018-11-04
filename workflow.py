@@ -72,6 +72,8 @@ X_cnn = X.reshape(X.shape[0], img_size, img_size, 1)
 
 X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.2, random_state=42)
 
+X_test = X_test_cnn.reshape(X_test_cnn.shape[0], img_size ** 2)
+
 y_train_cat_cnn = to_categorical(y_train_cnn)
 y_test_cat_cnn = to_categorical(y_test_cnn)
 
@@ -89,7 +91,7 @@ parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
 
 # mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 3)
 
-val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
+# val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 
 # Print parameters with the highes val_accuracy
 
@@ -110,7 +112,7 @@ val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 
 # 3.2 Confusion matrix
 
-y_pred = pred.predict(X_test_cnn)
+y_pred = pred.predict(X_test)
 
 conf_mat = confusion_matrix(y_test_cnn, y_pred)
 
