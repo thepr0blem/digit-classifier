@@ -3,27 +3,30 @@
 The purpose of this project is to develop convolutional neural network for written characters classification. 
 
 ### Content of this document 
-1. General overview
-2. Data loading, exploring and preprocessing the data
-3. CNN modelling
+1. Introduction
+2. Data loading, exploring and preprocessing
+3. CNN model architecture selection, initialization and training
 4. Model evaluation
 
-## 1. General overview 
+## 1. Introduction 
 
 ### 1.1 Technologies used: 
-```Keras``` (framework based on ```Tensorflow```) 
+```Keras``` library (framework based on ```Tensorflow```) 
 
 ### 1.2 Validation:
-Multiple tools provided in ```scikit-learn``` library:
-- random division of the sample on training, validation and testing sets
-- confusion matrix and classification report 
+Tools provided in ```scikit-learn``` library:
+- random division of the sample on training and testing sets
+- confusion matrix 
 
 ### 1.3 Techniques for accuracy improvement:
-Estimated expected accuracy of the classifier: 95%. Based on model performance calculated from testing set accuracy. 
+Estimated accuracy of the classifier: 94.8%. Based on model performance calculated from testing set accuracy. 
 Techniques: 
-- regularization (via Dropout layers) 
+- regularization (via Dropout) 
 - hyperparameter tuning (via Random Search) 
-- callbacks: Early stopping, ReduceLROnPlateau 
+- early stopping 
+- learning rate reduction (via ReduceLROnPlateau) 
+- gradient descent optimization ("adam", "adamax", "nadam", "RMSProp")
+- image augmentation (rotation and shift) - tested, but not used
 
 ### 1.4 Project structure 
 
@@ -31,25 +34,27 @@ Techniques:
 ├── data                    # Data sets
 ├── logs                    # Training history logs 
 ├── models                  # Trained models 
-├── pics                    # Pictures/Visualizations 
+├── pics                    # Pictures/visualizations 
 ├── src                     # Source files 
 ├── workflow.py             # Code for workflow as presented in README
 ├── predict.py              # Function for new data classification 
 ├── requirments.txt         # Required libraries
 └── README.md                 
 ```
+
 ### 1.5 Dataset overview
-Training dataset consist of 30,134 examples of written characters divided into 35 classes - 10 digits and 25 letters. 
-
-There is no class for letter "X". 
-
-Each example is a 56x56 black/white image. Pixels are values 0 or 1. 
-
-Training set is provided in form of numpy arrays with 3,136 columns (with pixel values) and one additional vector with class label. 
 
 **NOTE:** In the original data set there were 36 classes and one of them (class #30) had only one example.
-          This class was overlapping with class #14 (both were letter "N"). Single example from class #30 was moved to
-          class #14 and class #35 was renamed to #30.
+          This class was overlapping with class #14 (both were letter "N"). This was ignored, class were not renamed, due to further               possibility of testing on unseen data set. 
+
+Observations: 
+- training set is provided in form of numpy arrays with 3,136 columns (with pixel values) and one additional vector with class labels
+- training dataset consist of 30,134 examples of written characters divided into 35 classes - 10 digits and 25 letters
+- the characters are centered and aligned in terms of the size
+- the classes are not in order (letters and digits are mixed) 
+- there is no data/class for letter "X" 
+- each example is a 56x56 image unfolded to 1x3136 vector (data need to be reshaped before feeding into CNN model) 
+
 
 ### 1.6 How to USE
 
@@ -57,7 +62,28 @@ Training set is provided in form of numpy arrays with 3,136 columns (with pixel 
 
 Required technologies are listed in ```requirments.txt``` file.
 
-Imports 
+Imports used in ```workflow.py``` file and all dependencies 
+
+```python
+import numpy as np
+import pickle
+import seaborn as sns
+import random as rd
+from matplotlib import pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+
+from keras import Sequential
+from keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from keras.utils import to_categorical
+from keras.models import load_model
+
+from src import modelling as mod
+from src import visualization as vis
+import predict as pred
+```
 
 ***IMPORTS CODE***
 
@@ -393,10 +419,12 @@ score = model.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=32)
 ```
 
 ```
-print("Test set accuracy {}%".format(np.round(score[1]*100), 3))
-Test set accuracy 95.0%
+print("Test set accuracy {}%".format(np.round(score[1], 3) * 100))
 ```
-Accuracy on test score is 95%. 
+```
+Test set accuracy 94.8%
+```
+Accuracy on test score is 94.8%. 
 
 ### 4.2 Confusion matrix 
 
@@ -437,56 +465,7 @@ vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
 ```
 ![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat_new.png) 
 
-### 4.3 Accuracy report 
-
-Another interesting tool provided by ```scikit-learn``` and useful while evaluating any classifier is ```classification_report``` 
-
-```python
-class_rep = classification_report(y_test_cnn, y_pred, target_names=labels_list)
-```
-```python
-print(class_rep)
-             precision    recall  f1-score   support
-          6       0.74      0.80      0.77        25
-          P       0.94      0.94      0.94        67
-          O       0.81      0.97      0.88       400
-          V       0.95      0.97      0.96       269
-          W       0.98      0.98      0.98       153
-          3       1.00      0.98      0.99        46
-          A       0.99      1.00      0.99       485
-          8       1.00      0.91      0.95        22
-          T       1.00      1.00      1.00       244
-          I       0.50      0.05      0.09        60
-          0       0.40      0.02      0.05        82
-          9       0.97      0.91      0.94        32
-          H       1.00      0.96      0.98        94
-          R       0.99      0.98      0.99       412
-          N       0.99      0.99      0.99       640
-          7       1.00      0.95      0.98        42
-          K       0.96      0.96      0.96       138
-          L       0.97      0.97      0.97       172
-          G       0.95      0.92      0.94        91
-          4       0.89      0.89      0.89        28
-          Y       0.98      0.95      0.96        83
-          C       0.95      0.95      0.95       103
-          E       0.99      1.00      0.99       438
-          J       0.88      0.82      0.85        17
-          5       0.78      0.86      0.82        21
-          1       0.83      0.99      0.90       283
-          S       0.98      0.97      0.97       246
-          2       0.61      0.71      0.66        31
-          F       0.96      0.98      0.97        49
-          Z       0.94      0.90      0.92       157
-          U       0.96      0.96      0.96       406
-          Q       1.00      0.94      0.97        31
-          M       0.97      0.98      0.97       210
-          B       0.98      0.97      0.98       122
-          D       0.95      0.96      0.95       328
-avg / total       0.94      0.95      0.94      6027
-```
-As expected, the lowest accuracy occurs in characters which might be easily mistaken like "0" vs "O", "i" vs "1" etc. 
-
-### 4.4 Display exemplary mistakes 
+### 4.3 Display exemplary mistakes 
 
 Define ```display_errors()``` function. 
 
@@ -512,13 +491,16 @@ def display_errors(X, y_true, y_pred, labels):
 
 ![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/sample_errors.png) 
 
-## Conclusions 
+## Summary 
 
-Model did pretty well on test set scoring 95% accuracy. 
-
-Ideas which were considered during the development, but were not implemented (indication of potential further are for exploration) 
-- data augmentation (via small rotatio, translation and zoom)  
-- replacing MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
+- model did pretty well on test set scoring 94.8% accuracy
+- based on insightful view presented in confusion matrix, we can conclude that the model misclassifies characters with similar shape Examples:  
+  - "o" vs "0" 
+  - "i" vs "1"
+  - "z' vs "2"
+  - "v" vs "u" 
+- errors made by classifier are easier to understand if we take a look at exemplary errors in section 4.3. Some of those examples probably could be also misclassified by human eye
+- during the development process data augmentation (via small 10 degree rotation and 0.1 relative position translation) was also considered and tested. However, the same model had 93.2% accuracy on test set therefore the solution was not adapted 
 
 ### References 
 [1] https://www.kaggle.com/cdeotte/how-to-choose-cnn-architecture-mnist
