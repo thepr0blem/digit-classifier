@@ -71,7 +71,7 @@ X_cnn = X.reshape(X.shape[0], img_size, img_size, 1)
 
 # 1.3.1 Split into training and testing set
 
-X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.2, random_state=42)
+X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.8, random_state=42)
 
 X_test = X_test_cnn.reshape(X_test_cnn.shape[0], img_size ** 2)
 
@@ -82,16 +82,18 @@ y_test_cat_cnn = to_categorical(y_test_cnn)
 # 2.1 Defining CNN architecture
 # 2.2 Hyperparameter tuning
 
-# parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
-#                   "kern_size": [3, 4, 5, 6, 7],
-#                   "max_pool": [2, 3],
-#                   "dropout_perc": [0.1, 0.2, 0.3, 0.4, 0.5],
-#                   "dense_size": [64, 128, 192, 256, 512, 1024],
-#                   "optimizers": ["adam", "adamax", "nadam", "RMSProp"]
-#                   }
-#
-# mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 20)
-#
+parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
+                  "kern_size": [3, 4, 5, 6, 7],
+                  "max_pool": [2, 3, 4],
+                  "dropout_perc": [0.1, 0.2, 0.3, 0.4, 0.5],
+                  "dense_size": [64, 128, 192, 256, 512, 1024],
+                  "optimizers": ["adam", "adamax", "nadam", "RMSProp"],
+                  "batch_size": [16, 32, 64, 128, 256, 512, 1024]
+                  }
+
+mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 70)
+
+
 val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 
 # Print parameters with the highes val_accuracy
@@ -113,20 +115,20 @@ print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(val_acc
 
 # 3.2 Confusion matrix
 
-y_pred = pred.predict(X_test_cnn)
-
-conf_mat = confusion_matrix(y_test_cnn, y_pred)
-
-labels_list = [labels[i] for i in range(35)]
-
-plt.figure(3)
-vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
-
-# 3.3 Classification report
-
-class_rep = classification_report(y_test_cnn, y_pred, target_names=labels_list)
-
-print(class_rep)
-
-# 3.4 Plot sample wrong classifications
-vis.display_errors(X_test_cnn, y_test_cnn, y_pred, labels)
+# y_pred = pred.predict(X_test_cnn)
+#
+# conf_mat = confusion_matrix(y_test_cnn, y_pred)
+#
+# labels_list = [labels[i] for i in range(35)]
+#
+# plt.figure(3)
+# vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
+#
+# # 3.3 Classification report
+#
+# class_rep = classification_report(y_test_cnn, y_pred, target_names=labels_list)
+#
+# print(class_rep)
+#
+# # 3.4 Plot sample wrong classifications
+# vis.display_errors(X_test_cnn, y_test_cnn, y_pred, labels)

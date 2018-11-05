@@ -10,7 +10,7 @@ from keras.utils import to_categorical
 def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
                  max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
                  dens_size=128, val_split_perc=0.1, no_of_epochs=30,
-                 optimizer="adam", random_search=False):
+                 optimizer="adam", random_search=False, batch_size=64):
     """Creates an architecture, train and saves CNN model.
 
     Returns:
@@ -64,7 +64,7 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
                         validation_split=val_split_perc,
                         epochs=no_of_epochs,
                         callbacks=[early_stopping_monitor, rlrop],
-                        batch_size=64)
+                        batch_size=batch_size)
 
     history_dict = history.history
 
@@ -104,6 +104,7 @@ def run_random_search(X, y, params, no_of_searches=1):
                        "dropout_perc_dens": rd.choice(params["dropout_perc"]),
                        "dense_size": rd.choice(params["dense_size"]),
                        "optimizer": rd.choice(params["optimizers"]),
+                       "batch_size": rd.choice(params["batch_size"])
                        }
 
         np.save(r"./models/random_search/params/params_dict_{}.npy".format(i), params_dict)
@@ -117,7 +118,10 @@ def run_random_search(X, y, params, no_of_searches=1):
                                  drop_perc_dense=params_dict["dropout_perc_dens"],
                                  dens_size=params_dict["dense_size"],
                                  optimizer=params_dict["optimizer"],
-                                 random_search=True
+                                 random_search=True,
+                                 batch_size=params_dict["batch_size"],
+                                 no_of_epochs=3,
+                                 val_split_perc=0.1
                                  )
 
         val_accs_list.append(hist_dict['val_acc'][-1])
