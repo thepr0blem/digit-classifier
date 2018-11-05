@@ -10,15 +10,17 @@ The purpose of this project is to develop convolutional neural network for writt
 
 ## 1. Introduction 
 
-### 1.1 Technologies used: 
+### 1.1 Technologies and techniques used: 
+
+#### Model architecture 
 ```Keras``` library (framework based on ```Tensorflow```) 
 
-### 1.2 Validation:
+#### Validation:
 Tools provided in ```scikit-learn``` library:
 - random division of the sample on training and testing sets
 - confusion matrix 
 
-### 1.3 Techniques for accuracy improvement:
+#### Techniques for accuracy improvement:
 Estimated accuracy of the classifier: 94.8%. Based on model performance calculated from testing set accuracy. 
 Techniques: 
 - regularization (via Dropout) 
@@ -28,7 +30,7 @@ Techniques:
 - gradient descent optimization ("adam", "adamax", "nadam", "RMSProp")
 - image augmentation (rotation and shift) - tested, but not used
 
-### 1.4 Project structure 
+### 1.2 Project structure 
 
 ```
 ├── data                    # Data sets
@@ -42,10 +44,10 @@ Techniques:
 └── README.md                 
 ```
 
-### 1.5 Dataset overview
+### 1.3 Dataset overview
 
 **NOTE:** In the original data set there were 36 classes and one of them (class #30) had only one example.
-          This class was overlapping with class #14 (both were letter "N"). This was ignored, class were not renamed, due to further               possibility of testing on unseen data set. 
+          This class was overlapping with class #14 (both were letter "N"), single example was renamed #30 -> #14. 
 
 Observations: 
 - training set is provided in form of numpy arrays with 3,136 columns (with pixel values) and one additional vector with class labels
@@ -54,15 +56,17 @@ Observations:
 - the classes are not in order (letters and digits are mixed) 
 - there is no data/class for letter "X" 
 - each example is a 56x56 image unfolded to 1x3136 vector (data need to be reshaped before feeding into CNN model) 
+- pixel values are binary (0/1) 
 
-
-### 1.6 How to USE
-
-#### Imports
+### 1.4 How to USE
 
 Required technologies are listed in ```requirments.txt``` file.
 
-Imports used in ```workflow.py``` file and all dependencies 
+#### 1.4.1 ```workflow.py```
+
+To go through all te steps described in this document please use ```workflow.py``` script 
+
+Imports used in the script with all dependencies 
 
 ```python
 import numpy as np
@@ -85,11 +89,9 @@ from src import visualization as vis
 import predict as pred
 ```
 
-***IMPORTS CODE***
+#### 1.4.2 ```predict.py```
 
-#### Workflow
-
-#### Predict
+To leverage already trained model to make your own prediction, use ```predict.py``` 
 
 ```python
 def predict(input_data):
@@ -114,22 +116,20 @@ def predict(input_data):
 
 ### 2.1 Loading the data
 ```python
-# Load the data
-data_dir = r'./data/train_fixed.pkl'
+data_dir = r'./data/train_fix.pkl'
 
-file = open(data_dir, 'rb')
-data = pickle.load(file)
-file.close()
+with open(data_dir, 'rb') as f:
+    data = pickle.load(f)
 
 X, y = data
 ```
 Label dictionary 
 ```python
-labels = {0: "6", 1: "P", 2: "O", 3: "V", 4: "W", 5: "3", 6: "A",
-          7: "8", 8: "T", 9: "I", 10: "0", 11: "9", 12: "H", 13: "R",
-          14: "N", 15: "7", 16: "K", 17: "L", 18: "G", 19: "4", 20: "Y",
-          21: "C", 22: "E", 23: "J", 24: "5", 25: "1", 26: "S", 27: "2",
-          28: "F", 29: "Z", 30: "U", 31: "Q", 32: "M", 33: "B", 34: "D"}
+labels = {0: "6", 1: "P", 2: "O", 3: "V", 4: "W", 5: "3", 6: "A", 
+          7: "8", 8: "T", 9: "I", 10: "0", 11: "9", 12: "H", 13: "R", 
+          14: "N", 15: "7", 16: "K", 17: "L", 18: "G", 19: "4", 20: "Y", 
+          21: "C", 22: "E", 23: "J", 24: "5", 25: "1", 26: "S", 27: "2", 
+          28: "F", 29: "Z", 31: "Q", 32: "M", 33: "B", 34: "D", 35: "U"}
 ```  
 ### 2.2 Exploring data - samples
 Plotting classes distribution
@@ -145,6 +145,9 @@ plt.show()
 ```
 ![Classes](https://github.com/thepr0blem/task/blob/master/pics/data_viz.png) 
 
+**Observation**: Classes are not balanced - class "N" consist of more than 3,000 examples, where some of the classes have less than 300 examples. 
+
+Defining function to plotting randomly selected, exemplary pictures:
 ```python
 def plot_samples(X, y):
     f, axarr = plt.subplots(3, 3)
@@ -156,7 +159,7 @@ def plot_samples(X, y):
             axarr[i, j].axis('off')
             axarr[i, j].set_title(labels[y[n][0]])
 
-
+```
 vis.plot_samples(X, y)
 ```
 ![Classes](https://github.com/thepr0blem/task/blob/master/pics/samples.png) 
@@ -173,11 +176,9 @@ X_cnn = X.reshape(X.shape[0], img_size, img_size, 1)
 ```
 
 #### 2.3.2 Split into training and testing set 
-The data is split in two steps. 
-1. Split on training and testing sets in 90:10 proportion. 
-2. Training set is then split on training and validation set in 90:10 proportion - this happens when fitting the model. 
+The data has been split into two data sets in 80:20 proportion.  
 ```python
-X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.1, random_state=42)
+X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.2, random_state=42)
 ```
 
 #### 2.3.3 Label encoding 
@@ -190,7 +191,12 @@ y_test_cat_cnn = to_categorical(y_test_cnn)
 ## 3. Building CNN 
 ### 3.1 Defining CNN architecture
 
-To implement convolutional neural network I used **Keras** API (which is user friendly framework built on top of Tensorflow). I used Sequential model which is ordered hierarchy of layers. Layers are ordered as follows: 
+To implement convolutional neural network I used **Keras** API (which is user friendly framework built on top of Tensorflow). I used Sequential model which is ordered hierarchy of layers. The architecture has been chosen based on research and articles listed in references ([1] in this case). 
+
+Alternative approach that could be taken: adding additional functionality to ```run_random_search``` function which would consider different numbers of sets of layers. 
+
+Layers are ordered as follows:
+
   - **Conv2D** - conv. layer 
     - filters - 32
     - kernel_size - 3 x 3
@@ -277,14 +283,15 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
     model.add(Dense(dens_size, activation='relu'))
     model.add(Dropout(drop_perc_dense))
 
-    model.add(Dense(35, activation='softmax'))
+    model.add(Dense(36, activation='softmax'))
 
     model.compile(optimizer=optimizer,
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
 
     early_stopping_monitor = EarlyStopping(patience=5)
-    rlrop = ReduceLROnPlateau(monitor='val_acc', factor=0.5, patience=3, verbose=1, min_lr=0.00001)
+    rlrop = ReduceLROnPlateau(monitor='val_acc', factor=0.5, 
+                              patience=3, verbose=1, min_lr=0.00001)
 
     history = model.fit(X,
                         y_train_cat,
@@ -315,10 +322,11 @@ Defining parameters dictionary
 ```python
 parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
                   "kern_size": [3, 4, 5, 6, 7],
-                  "max_pool": [2, 3],
+                  "max_pool": [2, 3, 4],
                   "dropout_perc": [0.1, 0.2, 0.3, 0.4, 0.5],
                   "dense_size": [64, 128, 192, 256, 512, 1024],
-                  "optimizers": ["adam", "adamax", "nadam", "RMSProp"]
+                  "optimizers": ["adam", "adamax", "nadam", "RMSProp"],
+                  "batch_size": [16, 32, 64, 128, 256, 512, 1024]
                   }
 ```
 
@@ -336,6 +344,7 @@ def run_random_search(X, y, params, no_of_searches=1):
     """Perform random search on hyper parameters list, saves models and validation accuracies.
 
     Args:
+          
         params: Dictionary with hyperparameters for CNN random search.
         no_of_searches: How many times random search is executed.
 
