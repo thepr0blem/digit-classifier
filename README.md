@@ -160,6 +160,7 @@ def plot_samples(X, y):
             axarr[i, j].set_title(labels[y[n][0]])
 
 ```
+```
 vis.plot_samples(X, y)
 ```
 ![Classes](https://github.com/thepr0blem/task/blob/master/pics/samples.png) 
