@@ -521,12 +521,12 @@ Ideas which were considered during the development, but were not implemented (in
 - replacing MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
 
 ### References 
-https://www.kaggle.com/cdeotte/how-to-choose-cnn-architecture-mnist
+[1] https://www.kaggle.com/cdeotte/how-to-choose-cnn-architecture-mnist
 
-https://www.kaggle.com/yassineghouzam/introduction-to-cnn-keras-0-997-top-6/notebook
+[2] https://www.kaggle.com/yassineghouzam/introduction-to-cnn-keras-0-997-top-6/notebook
 
-https://www.kaggle.com/gpreda/cnn-with-tensorflow-keras-for-fashion-mnist
+[3] https://www.kaggle.com/gpreda/cnn-with-tensorflow-keras-for-fashion-mnist
 
-https://www.kaggle.com/cdeotte/25-million-images-0-99757-mnist
+[4] https://www.kaggle.com/cdeotte/25-million-images-0-99757-mnist
 
-https://www.kaggle.com/diegosch/classifier-evaluation-using-confusion-matrix
+[5] https://www.kaggle.com/diegosch/classifier-evaluation-using-confusion-matrix
