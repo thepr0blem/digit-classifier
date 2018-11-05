@@ -4,9 +4,10 @@
 # Packages list:
 
 numpy
-scipy
+pickle
 matplotlib
 scikit-learn
 tensorflow
-keras		
-
+keras	
+seaborn
+random
