@@ -48,7 +48,7 @@ Techniques:
 ### 1.3 Dataset overview
 
 **NOTE:** In the original data set there were 36 classes and one of them (class #30) had only one example.
-          This class was overlapping with class #14 (both were letter "N"), single example was renamed #30 -> #14. 
+          This class was overlapping with class #14 (both were letter "N"), single example was renamed #30 -> #14. Data set with this    change was saved as ```train_fix.pkl```
 
 Observations: 
 - training set is provided in form of numpy arrays with 3,136 columns (with pixel values) and one additional vector with class labels
