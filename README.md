@@ -141,7 +141,7 @@ count_plot = sns.countplot(y_classes, palette="Blues_d")
 
 plt.show()
 ```
-![Classes](https://github.com/thepr0blem/task/blob/master/pics/data_viz.png) 
+![Classes](https://github.com/thepr0blem/task/blob/master/pics/data_viz_F.png) 
 
 **Observation**: Classes are not balanced - class "N" consist of more than 3,000 examples, where some of the classes have less than 300 examples. 
 
@@ -497,7 +497,7 @@ Plotting:
 ```python
 vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
 ```
-![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat_new.png) 
+![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat_F.png) 
 
 ### 4.3 Display exemplary mistakes 
 
@@ -523,7 +523,7 @@ def display_errors(X, y_true, y_pred, labels):
                                .format(labels[y_pred_errors[n][0]], labels[y_true_errors[n][0]]))
 ```
 
-![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/sample_errors.png) 
+![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/sample_errors_F.png) 
 
 ## Summary 
 
