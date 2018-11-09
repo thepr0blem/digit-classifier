@@ -202,7 +202,7 @@ y_test_cat_cnn = to_categorical(y_test_cnn)
 
 To implement convolutional neural network I used **Keras** API (which is user friendly framework built on top of Tensorflow). I used Sequential model which is ordered hierarchy of layers. The architecture has been chosen based on research and articles listed in references ([1] in this case). 
 
-Alternative approach that could be taken: adding additional functionality to ```run_random_search``` function which would consider different numbers of sets of layers. 
+Alternative approach that could be taken: adding additional functionality to ```run_random_search()``` function which would consider different numbers of sets of layers. 
 
 Layers for final CNN are ordered as follows (selection of hyperparameters is presented in the following steps):
 
