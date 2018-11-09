@@ -141,7 +141,7 @@ count_plot = sns.countplot(y_classes, palette="Blues_d")
 
 plt.show()
 ```
-![Classes](https://github.com/thepr0blem/task/blob/master/pics/data_viz.png) 
+![Classes](https://github.com/thepr0blem/task/blob/master/pics/data_viz_F.PNG) 
 
 **Observation**: Classes are not balanced - class "N" consist of more than 3,000 examples, where some of the classes have less than 300 examples. 
 
@@ -457,8 +457,8 @@ Model_2: val_acc - 95.16%
 Model_3: val_acc - 95.19%
 ```
 
-Highest accuracy on test set has been identified for model_3 which is considered as final from now. 
-Its accuracy is estimated on 95.2%.
+Highest accuracy on test set has been identified for **model_3** which is considered as final from now. 
+Its accuracy is estimated on **95.2%**.
 
 ### 4.2 Confusion matrix 
 
@@ -497,7 +497,7 @@ Plotting:
 ```python
 vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
 ```
-![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat_new.png) 
+![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat_F.PNG) 
 
 ### 4.3 Display exemplary mistakes 
 
@@ -522,18 +522,20 @@ def display_errors(X, y_true, y_pred, labels):
             ax[i, j].set_title("Predicted label :{}\nTrue label :{}"
                                .format(labels[y_pred_errors[n][0]], labels[y_true_errors[n][0]]))
 ```
-
-![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/sample_errors.png) 
+```python
+vis.display_errors(X_test_cnn, y_test_cnn, y_pred, labels)
+```
+![Sample errors](https://github.com/thepr0blem/task/blob/master/pics/sample_errors_F.PNG) 
 
 ## Summary 
 
 - estimated model accuracy - 95.2% 
 - based on insightful view presented in confusion matrix, we can conclude that the model misclassifies characters with similar shape Examples:  
-  - "o" vs "0" 
-  - "i" vs "1"
-  - "z' vs "2"
-  - "v" vs "u" 
-- errors made by classifier are easier to understand if we take a look at exemplary errors in section 4.3. Some of those probably could be also misclassified by human eye
+  - "o" vs "0" - 78/82 examples of "0" classified as "o"
+  - "i" vs "1" - 55/60 examples of "i" classified as "1"
+  - "z' vs "2" - 17x confused with each other
+  - "v" vs "u" - 14x confused with each other
+- errors made by classifier are easier to understand if we take a look at exemplary errors in section 4.3. Some of those probably could be also misclassified by human eye (example "U" vs "O" 
 - during the development process data augmentation (via small 10 degree rotation and 0.1 relative position translation) was also considered and tested. However, the same model had 93.2% accuracy on test set therefore the solution was not adapted 
 
 ### References 
