@@ -28,7 +28,7 @@ Techniques:
 - early stopping 
 - learning rate reduction (via ReduceLROnPlateau) 
 - gradient descent optimization ("adam", "adamax", "nadam", "RMSProp")
-- image augmentation (rotation and shift) - tested, but not used
+- image augmentation (rotation and shift) - tested, but not used - to perform augmentation please run ```./src/augmentation.py``` script
 
 ### 1.2 Project structure 
 
