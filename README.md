@@ -433,10 +433,6 @@ mod.create_model(X_train_cnn, y_train_cnn, it="3", no_of_filters=40, kern_size=5
                  optimizer="adam", random_search=False, batch_size=24)
 ```
 
-```
-{'iteration': 13, 'no_of_filters': 64, 'kern_size': 7, 'max_pool': 3, 'dropout_perc_conv': 0.3, 'dropout_perc_dens': 0.2, 'dense_size': 128, 'optimizer': 'nadam'}
-```
-
 ## 4. Model evaluation
 ### 4.1 Load model and evaluate on test data set 
 
