@@ -1,25 +1,6 @@
 from keras.preprocessing.image import ImageDataGenerator
-from keras import backend as ker
 import pickle
-from matplotlib import pyplot as plt
 import numpy as np
-
-data_dir = r'./data/train_fixed.pkl'
-data_dir_aug = r'./data/train_aug_filled_fixed.pkl'
-
-file = open(data_dir, 'rb')
-data = pickle.load(file)
-
-X, y = data
-
-# max_count = np.max(np.unique(y, return_counts=True))
-# no_of_classes = len(np.unique(y, return_counts=True)[0])
-# n_cols = X.shape[1]
-# img_size = int(np.sqrt(n_cols))
-# ker.set_image_dim_ordering('th')
-# reshape to be [samples][pixels][width][height]
-
-# X_train = X.reshape(X.shape[0], 1, img_size, img_size)
 
 
 def data_by_class(data, label):
@@ -56,9 +37,9 @@ def data_aug(X_to_aug, y_to_aug, count_add=1000):
     X_resh = X_to_aug.reshape(X_to_aug.shape[0], img_size, img_size, 1)
 
     # Initialize ImageDataGen
-    datagen = ImageDataGenerator(width_shift_range=0.05,
-                                 height_shift_range=0.05,
-                                 rotation_range=15)
+    datagen = ImageDataGenerator(width_shift_range=0.1,
+                                 height_shift_range=0.1,
+                                 rotation_range=10)
 
     augmented_x = []
     augmented_y = []
@@ -78,18 +59,15 @@ def gen_missing_data(data):
 
     X, y = data
 
-    max_count = np.max(np.unique(y, return_counts=True))
-    req_count_vec = (np.unique(y, return_counts=True)[1] - max_count) * (-1) + 1
-    no_of_classes = len(np.unique(y, return_counts=True)[0])
-
+    classes = np.unique(y)
     augmented_req_x = np.zeros((1, 56 * 56)).astype(int)
     augmented_req_y = np.zeros((1, 1)).astype(int)
 
-    for i in range(no_of_classes):
+    for i in classes:
 
         X_lab, y_lab = data_by_class(data, i)
         print("Data augmenting for class {}".format(i))
-        X_aug, y_aug = data_aug(X_lab, y_lab, req_count_vec[i])
+        X_aug, y_aug = data_aug(X_lab, y_lab, 300)
         print("Finished, loading next class. ")
         augmented_req_x = np.vstack((augmented_req_x, X_aug))
         augmented_req_y = np.vstack((augmented_req_y, y_aug))
@@ -98,8 +76,19 @@ def gen_missing_data(data):
 
     return np.vstack((X, augmented_req_x)), np.vstack((y, augmented_req_y))
 
-# data_new = gen_missing_data(data)
-#
-# output = open(data_dir_aug, 'wb')
-# pickle.dump(data_new, output)
-# output.close()
+
+if __name__ == "__main__":
+
+    data_dir = r'./data/train_fix.pkl'
+    data_dir_aug = r'./data/train_fix_aug.pkl'
+
+    with open(data_dir, 'rb') as f:
+        data = pickle.load(f)
+
+    X, y = data
+
+    data_new = gen_missing_data(data)
+
+    output = open(data_dir_aug, 'wb')
+    pickle.dump(data_new, output)
+    output.close()

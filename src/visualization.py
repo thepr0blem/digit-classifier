@@ -43,6 +43,7 @@ def display_n(X, y, n):
 
 
 def plot_conf_mat(conf_mat, label_list, normalize=False):
+    """Plots confusion matrix"""
 
     if normalize:
 

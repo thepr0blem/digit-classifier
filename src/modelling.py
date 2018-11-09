@@ -50,14 +50,15 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
     model.add(Dense(dens_size, activation='relu'))
     model.add(Dropout(drop_perc_dense))
 
-    model.add(Dense(35, activation='softmax'))
+    model.add(Dense(36, activation='softmax'))
 
     model.compile(optimizer=optimizer,
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
 
     early_stopping_monitor = EarlyStopping(patience=5)
-    rlrop = ReduceLROnPlateau(monitor='val_acc', factor=0.5, patience=3, verbose=1, min_lr=0.00001)
+    rlrop = ReduceLROnPlateau(monitor='val_acc', factor=0.5,
+                              patience=3, verbose=1, min_lr=0.00001)
 
     history = model.fit(X,
                         y_train_cat,
@@ -70,13 +71,14 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
 
     if random_search:
 
-        np.save(r"./models/random_search/hist/history_dict_{}.npy".format(it), history_dict)
+        np.save(r"./models/random_search/hist/history_dict_{}.npy".format(it),
+                history_dict)
         model.save(r"./models/random_search/models/CNN_{}.h5".format(it))
 
     else:
 
         np.save(r"./logs/history_dict_{}.npy".format(it), history_dict)
-        model.save(r"./models/CNN_model_{}.h5".format(it))
+        model.save(r"./models/CNN_FF_{}.h5".format(it))
 
     return history_dict
 
@@ -85,6 +87,8 @@ def run_random_search(X, y, params, no_of_searches=1):
     """Perform random search on hyper parameters list, saves models and validation accuracies.
 
     Args:
+        X: training data
+        y: labels for training data
         params: Dictionary with hyperparameters for CNN random search.
         no_of_searches: How many times random search is executed.
 
@@ -120,13 +124,13 @@ def run_random_search(X, y, params, no_of_searches=1):
                                  optimizer=params_dict["optimizer"],
                                  random_search=True,
                                  batch_size=params_dict["batch_size"],
-                                 no_of_epochs=3,
+                                 no_of_epochs=5,
                                  val_split_perc=0.1
                                  )
 
         val_accs_list.append(hist_dict['val_acc'][-1])
 
-    np.save(r"./models/random_search/val_accs_list.npy", val_accs_list)
+        np.save(r"./models/random_search/val_accs_list.npy", val_accs_list)
 
     return val_accs_list
 
