@@ -90,35 +90,35 @@ for i in top_three_indices:
     print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(i)))
 
 
-# mod.create_model(X_train_cnn, y_train_cnn, it="1", no_of_filters=24, kern_size=3,
-#                  max_p_size=3, drop_perc_conv=0.1, drop_perc_dense=0.4,
-#                  dens_size=384, val_split_perc=0.1, no_of_epochs=40,
-#                  optimizer="adam", random_search=False, batch_size=24)
-#
-# mod.create_model(X_train_cnn, y_train_cnn, it="2", no_of_filters=56, kern_size=6,
-#                  max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.4,
-#                  dens_size=384, val_split_perc=0.1, no_of_epochs=40,
-#                  optimizer="adam", random_search=False, batch_size=24)
-#
-# mod.create_model(X_train_cnn, y_train_cnn, it="3", no_of_filters=40, kern_size=5,
-#                  max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.3,
-#                  dens_size=512, val_split_perc=0.1, no_of_epochs=40,
-#                  optimizer="adam", random_search=False, batch_size=24)
+mod.create_model(X_train_cnn, y_train_cnn, it="1", no_of_filters=24, kern_size=3,
+                 max_p_size=3, drop_perc_conv=0.1, drop_perc_dense=0.4,
+                 dens_size=384, val_split_perc=0.1, no_of_epochs=40,
+                 optimizer="adam", random_search=False, batch_size=24)
+
+mod.create_model(X_train_cnn, y_train_cnn, it="2", no_of_filters=56, kern_size=6,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.4,
+                 dens_size=384, val_split_perc=0.1, no_of_epochs=40,
+                 optimizer="adam", random_search=False, batch_size=24)
+
+mod.create_model(X_train_cnn, y_train_cnn, it="3", no_of_filters=40, kern_size=5,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.3,
+                 dens_size=512, val_split_perc=0.1, no_of_epochs=40,
+                 optimizer="adam", random_search=False, batch_size=24)
 
 # 4 Model evaluation
 # 4.1 Load model and evaluate on test data set
 
-# model_1 = keras.models.load_model(r"./models/CNN_FF_1.h5")
-# model_2 = keras.models.load_model(r"./models/CNN_FF_2.h5")
+model_1 = keras.models.load_model(r"./models/CNN_FF_1.h5")
+model_2 = keras.models.load_model(r"./models/CNN_FF_2.h5")
 model_3 = keras.models.load_model(r"./models/CNN_FF_3.h5")
 
-# score_1 = model_1.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
-# score_2 = model_2.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
-# score_3 = model_3.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
+score_1 = model_1.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
+score_2 = model_2.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
+score_3 = model_3.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
 
-# print("Model_1: val_acc - {}".format(np.round(score_1[1] * 100, 2)),
-#       "\nModel_2: val_acc - {}".format(np.round(score_2[1] * 100, 2)),
-#       "\nModel_3: val_acc - {}".format(np.round(score_3[1] * 100, 2)))
+print("Model_1: val_acc - {}".format(np.round(score_1[1] * 100, 2)),
+      "\nModel_2: val_acc - {}".format(np.round(score_2[1] * 100, 2)),
+      "\nModel_3: val_acc - {}".format(np.round(score_3[1] * 100, 2)))
 
 # 4.2 Confusion matrix
 
