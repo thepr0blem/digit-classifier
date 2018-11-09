@@ -134,9 +134,7 @@ labels = {0: "6", 1: "P", 2: "O", 3: "V", 4: "W", 5: "3", 6: "A",
 ### 2.2 Exploring data - samples
 Plotting classes distribution
 ```python
-y_vec = y.reshape(y.shape[0], )
-
-y_classes = sorted([labels[i] for i in y_vec])
+y_classes = sorted([labels[i] for i in y.reshape(y.shape[0], )])
 
 sns.set(style="darkgrid")
 count_plot = sns.countplot(y_classes, palette="Blues_d")
@@ -334,9 +332,9 @@ parameters_dct = {"no_of_filters": [8, 16, 24, 32, 40, 48, 56, 64],
 Defining the function which will perform random search given above set of hyperparameters. 
 
 The function will: 
-- use ```create model()``` function from above to train n number of models with randomly selected set of parameters
+- use ```create model()``` function from above to train "n" number of models with randomly selected set of parameters
 - it will save all models in ```./models/random_search/models``` 
-- it will save set of parameters and training histories for all iterations in ```./models/random_search/params``` and ```.models/random_search/hist``` accordingly 
+- it will save set of parameters and training histories for all iterations in ```./models/random_search/params``` and ```./models/random_search/hist``` accordingly 
 - only 15% of the whole data set will be used as I am looking only for indication which parameters will be the best instead of the ready model 
 
 ```python
@@ -493,7 +491,7 @@ def plot_conf_mat(conf_mat, label_list, normalize=False):
 ```
 Labels list: 
 ```python
-labels_list = [labels[i] for i in range(35)]
+labels_list = [labels[i] for i in range(36)]
 ```
 Plotting: 
 ```python
