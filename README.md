@@ -96,17 +96,17 @@ To leverage already trained model to make your own prediction, use ```predict.py
 
 ```python
 def predict(input_data):
-    """This functions classifies given input 
+    """This functions classifies given input
 
     Args:
         input_data: (n x 3136) array, where n - # of examples
-        
-    Returns:
-        output_data: (n x 1) array with class labels 
-    """
-    model_in = load_model(r"./models/CNN_1.h5")
 
-    prediction = model_in.predict(input_data)
+    Returns:
+        output_data: (n x 1) array with class labels
+    """
+    model_in = load_model(r"./models/CNN_FF_3.h5")
+
+    prediction = model_in.predict(input_data.reshape(input_data.shape[0], 56, 56, 1))
 
     output_data = prediction.argmax(axis=1).reshape(len(prediction), 1)
 
@@ -148,16 +148,25 @@ plt.show()
 
 Defining function to plotting randomly selected, exemplary pictures:
 ```python
-def plot_samples(X, y):
-    f, axarr = plt.subplots(3, 3)
+def plot_samples(X, y, labels):
+    """Display 3x3 plot with sample images from X, y dataset.
+
+    Args:
+        X: (i x j) array with i examples (each of them j features)
+        y: (i x 1) vector with labels
+        n: dict with {class: label} structure
+
+    Returns:
+        Displays n-th example and returns class label.
+    """
+    f, plarr = plt.subplots(3, 3)
 
     for i in range(3):
         for j in range(3):
-            n = rd.randint(0, X.shape[1])
-            axarr[i, j].imshow(X[n].reshape(56, 56), cmap='gray')
-            axarr[i, j].axis('off')
-            axarr[i, j].set_title(labels[y[n][0]])
-
+            n = rd.randint(0, X.shape[0])
+            plarr[i, j].imshow(X[n].reshape(56, 56), cmap='gray')
+            plarr[i, j].axis('off')
+            plarr[i, j].set_title(labels[y[n][0]])
 ```
 ```
 vis.plot_samples(X, y)
@@ -476,7 +485,8 @@ Next, short function for plotting the matrix will be required. I used ```seaborn
 
 ```python
 def plot_conf_mat(conf_mat, label_list, normalize=False):
-
+    """Plots confusion matrix"""
+    
     if normalize:
 
         conf_mat = conf_mat.astype(float) / conf_mat.sum(axis=1)[:, np.newaxis]
