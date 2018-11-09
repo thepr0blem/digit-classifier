@@ -3,67 +3,95 @@
 The purpose of this project is to develop convolutional neural network for written characters classification. 
 
 ### Content of this document 
-1. General overview
-2. Data loading, exploring and preprocessing the data
-3. CNN modelling
+1. Introduction
+2. Data loading, exploring and preprocessing
+3. CNN model architecture selection, initialization and training
 4. Model evaluation
 
-## 1. General overview 
+## 1. Introduction 
 
-### 1.1 Technologies used: 
-```Keras``` (framework based on ```Tensorflow```) 
+### 1.1 Technologies and techniques used: 
 
-### 1.2 Validation:
-Multiple tools provided in ```scikit-learn``` library:
-- random division of the sample on training, validation and testing sets
-- confusion matrix and classification report 
+#### Model architecture 
+```Keras``` library (framework based on ```Tensorflow```) 
 
-### 1.3 Techniques for accuracy improvement:
-Estimated expected accuracy of the classifier: 95%. Based on model performance calculated from testing set accuracy. 
+#### Validation:
+Tools provided in ```scikit-learn``` library:
+- random division of the sample on training and testing sets
+- confusion matrix 
+
+#### Techniques for accuracy improvement:
+Estimated accuracy of the classifier: 95.2%. Based on model performance calculated from testing set accuracy. 
 Techniques: 
-- regularization (via Dropout layers) 
+- regularization (via Dropout) 
 - hyperparameter tuning (via Random Search) 
-- callbacks: Early stopping, ReduceLROnPlateau 
+- early stopping 
+- learning rate reduction (via ReduceLROnPlateau) 
+- gradient descent optimization ("adam", "adamax", "nadam", "RMSProp")
+- image augmentation (rotation and shift) - tested, but not used
 
-### 1.4 Project structure 
+### 1.2 Project structure 
 
 ```
 ├── data                    # Data sets
 ├── logs                    # Training history logs 
 ├── models                  # Trained models 
-├── pics                    # Pictures/Visualizations 
+├── pics                    # Pictures/visualizations 
 ├── src                     # Source files 
 ├── workflow.py             # Code for workflow as presented in README
 ├── predict.py              # Function for new data classification 
 ├── requirments.txt         # Required libraries
 └── README.md                 
 ```
-### 1.5 Dataset overview
-Training dataset consist of 30,134 examples of written characters divided into 35 classes - 10 digits and 25 letters. 
 
-There is no class for letter "X". 
-
-Each example is a 56x56 black/white image. Pixels are values 0 or 1. 
-
-Training set is provided in form of numpy arrays with 3,136 columns (with pixel values) and one additional vector with class label. 
+### 1.3 Dataset overview
 
 **NOTE:** In the original data set there were 36 classes and one of them (class #30) had only one example.
-          This class was overlapping with class #14 (both were letter "N"). Single example from class #30 was moved to
-          class #14 and class #35 was renamed to #30.
+          This class was overlapping with class #14 (both were letter "N"), single example was renamed #30 -> #14. 
 
-### 1.6 How to USE
+Observations: 
+- training set is provided in form of numpy arrays with 3,136 columns (with pixel values) and one additional vector with class labels
+- training dataset consist of 30,134 examples of written characters divided into 35 classes - 10 digits and 25 letters
+- the characters are centered and aligned in terms of the size
+- the classes are not in order (letters and digits are mixed) 
+- there is no data/class for letter "X" 
+- each example is a 56x56 image unfolded to 1x3136 vector (data need to be reshaped before feeding into CNN model) 
+- pixel values are binary (0 - black / 1 - white) 
 
-#### Imports
+### 1.4 How to USE
 
 Required technologies are listed in ```requirments.txt``` file.
 
-Imports 
+#### 1.4.1 ```workflow.py```
 
-***IMPORTS CODE***
+To go through all te steps described in this document please use ```workflow.py``` script 
 
-#### Workflow
+Imports used in the script with all dependencies 
 
-#### Predict
+```python
+import numpy as np
+import pickle
+import seaborn as sns
+import random as rd
+from matplotlib import pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
+
+from keras import Sequential
+from keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
+from keras.callbacks import EarlyStopping, ReduceLROnPlateau
+from keras.utils import to_categorical
+from keras.models import load_model
+
+from src import modelling as mod
+from src import visualization as vis
+import predict as pred
+```
+
+#### 1.4.2 ```predict.py```
+
+To leverage already trained model to make your own prediction, use ```predict.py``` 
 
 ```python
 def predict(input_data):
@@ -88,29 +116,25 @@ def predict(input_data):
 
 ### 2.1 Loading the data
 ```python
-# Load the data
-data_dir = r'./data/train_fixed.pkl'
+data_dir = r'./data/train_fix.pkl'
 
-file = open(data_dir, 'rb')
-data = pickle.load(file)
-file.close()
+with open(data_dir, 'rb') as f:
+    data = pickle.load(f)
 
 X, y = data
 ```
 Label dictionary 
 ```python
-labels = {0: "6", 1: "P", 2: "O", 3: "V", 4: "W", 5: "3", 6: "A",
-          7: "8", 8: "T", 9: "I", 10: "0", 11: "9", 12: "H", 13: "R",
-          14: "N", 15: "7", 16: "K", 17: "L", 18: "G", 19: "4", 20: "Y",
-          21: "C", 22: "E", 23: "J", 24: "5", 25: "1", 26: "S", 27: "2",
-          28: "F", 29: "Z", 30: "U", 31: "Q", 32: "M", 33: "B", 34: "D"}
+labels = {0: "6", 1: "P", 2: "O", 3: "V", 4: "W", 5: "3", 6: "A", 
+          7: "8", 8: "T", 9: "I", 10: "0", 11: "9", 12: "H", 13: "R", 
+          14: "N", 15: "7", 16: "K", 17: "L", 18: "G", 19: "4", 20: "Y", 
+          21: "C", 22: "E", 23: "J", 24: "5", 25: "1", 26: "S", 27: "2", 
+          28: "F", 29: "Z", 31: "Q", 32: "M", 33: "B", 34: "D", 35: "U"}
 ```  
 ### 2.2 Exploring data - samples
 Plotting classes distribution
 ```python
-y_vec = y.reshape(y.shape[0], )
-
-y_classes = sorted([labels[i] for i in y_vec])
+y_classes = sorted([labels[i] for i in y.reshape(y.shape[0], )])
 
 sns.set(style="darkgrid")
 count_plot = sns.countplot(y_classes, palette="Blues_d")
@@ -119,6 +143,9 @@ plt.show()
 ```
 ![Classes](https://github.com/thepr0blem/task/blob/master/pics/data_viz.png) 
 
+**Observation**: Classes are not balanced - class "N" consist of more than 3,000 examples, where some of the classes have less than 300 examples. 
+
+Defining function to plotting randomly selected, exemplary pictures:
 ```python
 def plot_samples(X, y):
     f, axarr = plt.subplots(3, 3)
@@ -130,7 +157,8 @@ def plot_samples(X, y):
             axarr[i, j].axis('off')
             axarr[i, j].set_title(labels[y[n][0]])
 
-
+```
+```
 vis.plot_samples(X, y)
 ```
 ![Classes](https://github.com/thepr0blem/task/blob/master/pics/samples.png) 
@@ -147,11 +175,9 @@ X_cnn = X.reshape(X.shape[0], img_size, img_size, 1)
 ```
 
 #### 2.3.2 Split into training and testing set 
-The data is split in two steps. 
-1. Split on training and testing sets in 90:10 proportion. 
-2. Training set is then split on training and validation set in 90:10 proportion - this happens when fitting the model. 
+The data has been split into two data sets in 80:20 proportion.  
 ```python
-X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.1, random_state=42)
+X_train_cnn, X_test_cnn, y_train_cnn, y_test_cnn = train_test_split(X_cnn, y, test_size=0.2, random_state=42)
 ```
 
 #### 2.3.3 Label encoding 
@@ -164,16 +190,21 @@ y_test_cat_cnn = to_categorical(y_test_cnn)
 ## 3. Building CNN 
 ### 3.1 Defining CNN architecture
 
-To implement convolutional neural network I used **Keras** API (which is user friendly framework built on top of Tensorflow). I used Sequential model which is ordered hierarchy of layers. Layers are ordered as follows: 
+To implement convolutional neural network I used **Keras** API (which is user friendly framework built on top of Tensorflow). I used Sequential model which is ordered hierarchy of layers. The architecture has been chosen based on research and articles listed in references ([1] in this case). 
+
+Alternative approach that could be taken: adding additional functionality to ```run_random_search``` function which would consider different numbers of sets of layers. 
+
+Layers for final CNN are ordered as follows (selection of hyperparameters is presented in the following steps):
+
   - **Conv2D** - conv. layer 
-    - filters - 32
-    - kernel_size - 3 x 3
+    - filters - 40
+    - kernel_size - 5 x 5
     - activation - 'relu' 
     - input shape - 4D tensor - (n, 56, 56, 1), where (number of examples, img_size, img_size, no_of_channels) 
     - padding - 'same'
   - **Conv2D** - conv. layer 
-    - filters - 32
-    - kernel_size - 3 x 3
+    - filters - 40
+    - kernel_size - 5 x 5
     - activation - 'relu' 
     - padding - 'same'
   - **Max_Pooling** - subsampling layer
@@ -182,13 +213,13 @@ To implement convolutional neural network I used **Keras** API (which is user fr
     - dropout_percentage - 30%
 
   - **Conv2D** - conv. layer 
-    - filters - 32
-    - kernel_size - 3 x 3
+    - filters - 40
+    - kernel_size - 5 x 5
     - activation - 'relu' 
     - padding - 'same'
   - **Conv2D** - conv. layer 
-    - filters - 32
-    - kernel_size - 3 x 3
+    - filters - 40
+    - kernel_size - 5 x 5
     - activation - 'relu' 
     - padding - 'same'
   - **Max_Pooling** - subsampling layer
@@ -198,20 +229,20 @@ To implement convolutional neural network I used **Keras** API (which is user fr
  
   - **Flatten** - flattening input for dense layers input
   - **Dense** - regular dense layer
-    - number of neurons - 128
+    - number of neurons - 512
     - activation - 'relu'
   - **Dropout** - regularization layer
-    - dropout_percentage - 20%
+    - dropout_percentage - 30%
    
   - **Dense** - final layer
     - units - number of classes
-    - activation - softmax
+    - activation - 'softmax'
     
 ```python
 def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
                  max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
                  dens_size=128, val_split_perc=0.1, no_of_epochs=5,
-                 optimizer="adam", random_search=False):
+                 optimizer="adam", random_search=False, batch_size=64):
     """Creates an architecture, train and saves CNN model.
 
     Returns:
@@ -251,21 +282,22 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
     model.add(Dense(dens_size, activation='relu'))
     model.add(Dropout(drop_perc_dense))
 
-    model.add(Dense(35, activation='softmax'))
+    model.add(Dense(36, activation='softmax'))
 
     model.compile(optimizer=optimizer,
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
 
     early_stopping_monitor = EarlyStopping(patience=5)
-    rlrop = ReduceLROnPlateau(monitor='val_acc', factor=0.5, patience=3, verbose=1, min_lr=0.00001)
+    rlrop = ReduceLROnPlateau(monitor='val_acc', factor=0.5, 
+                              patience=3, verbose=1, min_lr=0.00001)
 
     history = model.fit(X,
                         y_train_cat,
                         validation_split=val_split_perc,
                         epochs=no_of_epochs,
                         callbacks=[early_stopping_monitor, rlrop],
-                        batch_size=128)
+                        batch_size=batch_size)
 
     history_dict = history.history
 
@@ -277,7 +309,7 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
     else:
 
         np.save(r"./logs/history_dict_{}.npy".format(it), history_dict)
-        model.save(r"./models/CNN_model_{}.h5".format(it))
+        model.save(r"./models/CNN_FF_{}.h5".format(it))
 
     return history_dict
 ```
@@ -287,21 +319,22 @@ I used **random search** approach to select the best set of hyperparameters give
 
 Defining parameters dictionary 
 ```python
-parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
+parameters_dct = {"no_of_filters": [8, 16, 24, 32, 40, 48, 56, 64],
                   "kern_size": [3, 4, 5, 6, 7],
-                  "max_pool": [2, 3],
+                  "max_pool": [2, 3, 4],
                   "dropout_perc": [0.1, 0.2, 0.3, 0.4, 0.5],
-                  "dense_size": [64, 128, 192, 256, 512, 1024],
-                  "optimizers": ["adam", "adamax", "nadam", "RMSProp"]
+                  "dense_size": [64, 128, 192, 256, 384, 512],
+                  "optimizers": ["adam", "adamax", "nadam", "RMSProp"],
+                  "batch_size": [16, 32, 32, 48, 64, 96, 128]
                   }
 ```
 
 Defining the function which will perform random search given above set of hyperparameters. 
 
 The function will: 
-- use ```create model()``` function from above to train n number of models with randomly selected set of parameters
+- use ```create model()``` function from above to train "n" number of models with randomly selected set of parameters
 - it will save all models in ```./models/random_search/models``` 
-- it will save set of parameters and training histories for all iterations in ```./models/random_search/params``` and ```.models/random_search/hist``` accordingly 
+- it will save set of parameters and training histories for all iterations in ```./models/random_search/params``` and ```./models/random_search/hist``` accordingly 
 - only 15% of the whole data set will be used as I am looking only for indication which parameters will be the best instead of the ready model 
 
 ```python
@@ -310,6 +343,8 @@ def run_random_search(X, y, params, no_of_searches=1):
     """Perform random search on hyper parameters list, saves models and validation accuracies.
 
     Args:
+        X: training data
+        y: labels for training data
         params: Dictionary with hyperparameters for CNN random search.
         no_of_searches: How many times random search is executed.
 
@@ -319,7 +354,7 @@ def run_random_search(X, y, params, no_of_searches=1):
     val_accs_list = []
 
     for i in range(no_of_searches):
-        # Creating a tuple for each iteration of random search with selected parameters
+        # Creating a dict for each iteration of randomly selected parameters
 
         params_dict = {"iteration": i + 1,
                        "no_of_filters": rd.choice(params["no_of_filters"]),
@@ -332,7 +367,8 @@ def run_random_search(X, y, params, no_of_searches=1):
                        }
 
         np.save(r"./models/random_search/params/params_dict_{}.npy".format(i), params_dict)
-
+        
+        # Training model using selected parameters 
         hist_dict = create_model(X, y,
                                  it=i + 1,
                                  no_of_filters=params_dict["no_of_filters"],
@@ -347,7 +383,7 @@ def run_random_search(X, y, params, no_of_searches=1):
 
         val_accs_list.append(hist_dict['val_acc'][-1])
 
-    np.save(r"./models/random_search/val_accs_list.npy", val_accs_list)
+        np.save(r"./models/random_search/val_accs_list.npy", val_accs_list)
 
     return val_accs_list
 ```
@@ -355,48 +391,74 @@ def run_random_search(X, y, params, no_of_searches=1):
 Running the search. 
 
 ```python
-mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 20)
+mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 70)
 ```
 
-Loading list with accuracies and printing parameters for the "best" combination from random_search. 
+Loading list with accuracies and printing "top 3" sets of parameters from random_search. 
 
-```
+```python
 val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 ```
 
-```
-print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(val_accs_list.argmax())))
-```
-
-```
-{'iteration': 13, 'no_of_filters': 64, 'kern_size': 7, 'max_pool': 3, 'dropout_perc_conv': 0.3, 'dropout_perc_dens': 0.2, 'dense_size': 128, 'optimizer': 'nadam'}
-```
-Based on above, training model with given parameters on full training data set.
-
 ```python
-mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=3,
-                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
-                 dens_size=128, val_split_perc=0.1, no_of_epochs=30,
-                 optimizer="adam", random_search=False)
+top_three_indices = np.argsort(val_accs_list)[::-1][:3]
+
+for i in top_three_indices:
+
+    print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(i)))
 ```
-Model will be saved as ```models/CNN_v_F.h5```
+```
+{'iteration': 69, 'no_of_filters': 24, 'kern_size': 3, 'max_pool': 3, 'dropout_perc_conv': 0.1, 'dropout_perc_dens': 0.4, 'dense_size': 384, 'optimizer': 'adam', 'batch_size': 24}
+{'iteration': 11, 'no_of_filters': 56, 'kern_size': 6, 'max_pool': 3, 'dropout_perc_conv': 0.3, 'dropout_perc_dens': 0.4, 'dense_size': 384, 'optimizer': 'adam', 'batch_size': 24}
+{'iteration': 56, 'no_of_filters': 40, 'kern_size': 5, 'max_pool': 3, 'dropout_perc_conv': 0.3, 'dropout_perc_dens': 0.3, 'dense_size': 512, 'optimizer': 'adam', 'batch_size': 24}
+```
+
+Training three models based on top-3 sets of parameters: 
+```python
+mod.create_model(X_train_cnn, y_train_cnn, it="1", no_of_filters=24, kern_size=3,
+                 max_p_size=3, drop_perc_conv=0.1, drop_perc_dense=0.4,
+                 dens_size=384, val_split_perc=0.1, no_of_epochs=40,
+                 optimizer="adam", random_search=False, batch_size=24)
+
+mod.create_model(X_train_cnn, y_train_cnn, it="2", no_of_filters=56, kern_size=6,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.4,
+                 dens_size=384, val_split_perc=0.1, no_of_epochs=40,
+                 optimizer="adam", random_search=False, batch_size=24)
+
+mod.create_model(X_train_cnn, y_train_cnn, it="3", no_of_filters=40, kern_size=5,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.3,
+                 dens_size=512, val_split_perc=0.1, no_of_epochs=40,
+                 optimizer="adam", random_search=False, batch_size=24)
+```
 
 ## 4. Model evaluation
 ### 4.1 Load model and evaluate on test data set 
 
-```
-model = load_saved_model(r"./models/CNN_v_F.h5")
-```
-
-```
-score = model.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=32)
+```python
+model_1 = keras.models.load_model(r"./models/CNN_FF_1.h5")
+model_2 = keras.models.load_model(r"./models/CNN_FF_2.h5")
+model_3 = keras.models.load_model(r"./models/CNN_FF_3.h5")
 ```
 
+```python
+score_1 = model_1.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
+score_2 = model_2.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
+score_3 = model_3.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
 ```
-print("Test set accuracy {}%".format(np.round(score[1]*100), 3))
-Test set accuracy 95.0%
+
+```python
+print("Model_1: val_acc - {}".format(np.round(score_1[1] * 100, 2)),
+      "\nModel_2: val_acc - {}".format(np.round(score_2[1] * 100, 2)),
+      "\nModel_3: val_acc - {}".format(np.round(score_3[1] * 100, 2)))
 ```
-Accuracy on test score is 95%. 
+```
+Model_1: val_acc - 94.72% 
+Model_2: val_acc - 95.16% 
+Model_3: val_acc - 95.19%
+```
+
+Highest accuracy on test set has been identified for model_3 which is considered as final from now. 
+Its accuracy is estimated on 95.2%.
 
 ### 4.2 Confusion matrix 
 
@@ -429,7 +491,7 @@ def plot_conf_mat(conf_mat, label_list, normalize=False):
 ```
 Labels list: 
 ```python
-labels_list = [labels[i] for i in range(35)]
+labels_list = [labels[i] for i in range(36)]
 ```
 Plotting: 
 ```python
@@ -437,56 +499,7 @@ vis.plot_conf_mat(conf_mat, labels_list, normalize=False)
 ```
 ![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/conf_mat_new.png) 
 
-### 4.3 Accuracy report 
-
-Another interesting tool provided by ```scikit-learn``` and useful while evaluating any classifier is ```classification_report``` 
-
-```python
-class_rep = classification_report(y_test_cnn, y_pred, target_names=labels_list)
-```
-```python
-print(class_rep)
-             precision    recall  f1-score   support
-          6       0.74      0.80      0.77        25
-          P       0.94      0.94      0.94        67
-          O       0.81      0.97      0.88       400
-          V       0.95      0.97      0.96       269
-          W       0.98      0.98      0.98       153
-          3       1.00      0.98      0.99        46
-          A       0.99      1.00      0.99       485
-          8       1.00      0.91      0.95        22
-          T       1.00      1.00      1.00       244
-          I       0.50      0.05      0.09        60
-          0       0.40      0.02      0.05        82
-          9       0.97      0.91      0.94        32
-          H       1.00      0.96      0.98        94
-          R       0.99      0.98      0.99       412
-          N       0.99      0.99      0.99       640
-          7       1.00      0.95      0.98        42
-          K       0.96      0.96      0.96       138
-          L       0.97      0.97      0.97       172
-          G       0.95      0.92      0.94        91
-          4       0.89      0.89      0.89        28
-          Y       0.98      0.95      0.96        83
-          C       0.95      0.95      0.95       103
-          E       0.99      1.00      0.99       438
-          J       0.88      0.82      0.85        17
-          5       0.78      0.86      0.82        21
-          1       0.83      0.99      0.90       283
-          S       0.98      0.97      0.97       246
-          2       0.61      0.71      0.66        31
-          F       0.96      0.98      0.97        49
-          Z       0.94      0.90      0.92       157
-          U       0.96      0.96      0.96       406
-          Q       1.00      0.94      0.97        31
-          M       0.97      0.98      0.97       210
-          B       0.98      0.97      0.98       122
-          D       0.95      0.96      0.95       328
-avg / total       0.94      0.95      0.94      6027
-```
-As expected, the lowest accuracy occurs in characters which might be easily mistaken like "0" vs "O", "i" vs "1" etc. 
-
-### 4.4 Display exemplary mistakes 
+### 4.3 Display exemplary mistakes 
 
 Define ```display_errors()``` function. 
 
@@ -512,21 +525,24 @@ def display_errors(X, y_true, y_pred, labels):
 
 ![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/sample_errors.png) 
 
-## Conclusions 
+## Summary 
 
-Model did pretty well on test set scoring 95% accuracy. 
-
-Ideas which were considered during the development, but were not implemented (indication of potential further are for exploration) 
-- data augmentation (via small rotatio, translation and zoom)  
-- replacing MaxPooling layers with Conv2D layers with a (2, 2) stride - making subsampling layer also learnable 
+- estimated model accuracy - 95.2% 
+- based on insightful view presented in confusion matrix, we can conclude that the model misclassifies characters with similar shape Examples:  
+  - "o" vs "0" 
+  - "i" vs "1"
+  - "z' vs "2"
+  - "v" vs "u" 
+- errors made by classifier are easier to understand if we take a look at exemplary errors in section 4.3. Some of those probably could be also misclassified by human eye
+- during the development process data augmentation (via small 10 degree rotation and 0.1 relative position translation) was also considered and tested. However, the same model had 93.2% accuracy on test set therefore the solution was not adapted 
 
 ### References 
-https://www.kaggle.com/cdeotte/how-to-choose-cnn-architecture-mnist
+[1] https://www.kaggle.com/cdeotte/how-to-choose-cnn-architecture-mnist
 
-https://www.kaggle.com/yassineghouzam/introduction-to-cnn-keras-0-997-top-6/notebook
+[2] https://www.kaggle.com/yassineghouzam/introduction-to-cnn-keras-0-997-top-6/notebook
 
-https://www.kaggle.com/gpreda/cnn-with-tensorflow-keras-for-fashion-mnist
+[3] https://www.kaggle.com/gpreda/cnn-with-tensorflow-keras-for-fashion-mnist
 
-https://www.kaggle.com/cdeotte/25-million-images-0-99757-mnist
+[4] https://www.kaggle.com/cdeotte/25-million-images-0-99757-mnist
 
-https://www.kaggle.com/diegosch/classifier-evaluation-using-confusion-matrix
+[5] https://www.kaggle.com/diegosch/classifier-evaluation-using-confusion-matrix
