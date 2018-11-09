@@ -522,8 +522,10 @@ def display_errors(X, y_true, y_pred, labels):
             ax[i, j].set_title("Predicted label :{}\nTrue label :{}"
                                .format(labels[y_pred_errors[n][0]], labels[y_true_errors[n][0]]))
 ```
-
-![Conf_mat](https://github.com/thepr0blem/task/blob/master/pics/sample_errors_F.PNG) 
+```python
+vis.display_errors(X_test_cnn, y_test_cnn, y_pred, labels)
+```
+![Sample errors](https://github.com/thepr0blem/task/blob/master/pics/sample_errors_F.PNG) 
 
 ## Summary 
 
