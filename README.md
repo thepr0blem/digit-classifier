@@ -33,6 +33,7 @@ Techniques:
 ### 1.2 Project structure 
 
 ```
+├── archive                 # Old models 
 ├── data                    # Data sets
 ├── logs                    # Training history logs 
 ├── models                  # Trained models 
