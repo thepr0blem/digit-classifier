@@ -21,7 +21,7 @@ Tools provided in ```scikit-learn``` library:
 - confusion matrix 
 
 #### Techniques for accuracy improvement:
-Estimated accuracy of the classifier: 94.8%. Based on model performance calculated from testing set accuracy. 
+Estimated accuracy of the classifier: 95.2%. Based on model performance calculated from testing set accuracy. 
 Techniques: 
 - regularization (via Dropout) 
 - hyperparameter tuning (via Random Search) 
@@ -56,7 +56,7 @@ Observations:
 - the classes are not in order (letters and digits are mixed) 
 - there is no data/class for letter "X" 
 - each example is a 56x56 image unfolded to 1x3136 vector (data need to be reshaped before feeding into CNN model) 
-- pixel values are binary (0/1) 
+- pixel values are binary (0 - black / 1 - white) 
 
 ### 1.4 How to USE
 
@@ -196,17 +196,17 @@ To implement convolutional neural network I used **Keras** API (which is user fr
 
 Alternative approach that could be taken: adding additional functionality to ```run_random_search``` function which would consider different numbers of sets of layers. 
 
-Layers are ordered as follows:
+Layers for final CNN are ordered as follows (selection of hyperparameters is presented in the following steps):
 
   - **Conv2D** - conv. layer 
-    - filters - 32
-    - kernel_size - 3 x 3
+    - filters - 40
+    - kernel_size - 5 x 5
     - activation - 'relu' 
     - input shape - 4D tensor - (n, 56, 56, 1), where (number of examples, img_size, img_size, no_of_channels) 
     - padding - 'same'
   - **Conv2D** - conv. layer 
-    - filters - 32
-    - kernel_size - 3 x 3
+    - filters - 40
+    - kernel_size - 5 x 5
     - activation - 'relu' 
     - padding - 'same'
   - **Max_Pooling** - subsampling layer
@@ -215,13 +215,13 @@ Layers are ordered as follows:
     - dropout_percentage - 30%
 
   - **Conv2D** - conv. layer 
-    - filters - 32
-    - kernel_size - 3 x 3
+    - filters - 40
+    - kernel_size - 5 x 5
     - activation - 'relu' 
     - padding - 'same'
   - **Conv2D** - conv. layer 
-    - filters - 32
-    - kernel_size - 3 x 3
+    - filters - 40
+    - kernel_size - 5 x 5
     - activation - 'relu' 
     - padding - 'same'
   - **Max_Pooling** - subsampling layer
@@ -231,20 +231,20 @@ Layers are ordered as follows:
  
   - **Flatten** - flattening input for dense layers input
   - **Dense** - regular dense layer
-    - number of neurons - 128
+    - number of neurons - 512
     - activation - 'relu'
   - **Dropout** - regularization layer
-    - dropout_percentage - 20%
+    - dropout_percentage - 30%
    
   - **Dense** - final layer
     - units - number of classes
-    - activation - softmax
+    - activation - 'softmax'
     
 ```python
 def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
                  max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
                  dens_size=128, val_split_perc=0.1, no_of_epochs=5,
-                 optimizer="adam", random_search=False):
+                 optimizer="adam", random_search=False, batch_size=64):
     """Creates an architecture, train and saves CNN model.
 
     Returns:
@@ -299,7 +299,7 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
                         validation_split=val_split_perc,
                         epochs=no_of_epochs,
                         callbacks=[early_stopping_monitor, rlrop],
-                        batch_size=128)
+                        batch_size=batch_size)
 
     history_dict = history.history
 
@@ -311,7 +311,7 @@ def create_model(X, y, it=1, no_of_filters=32, kern_size=3,
     else:
 
         np.save(r"./logs/history_dict_{}.npy".format(it), history_dict)
-        model.save(r"./models/CNN_model_{}.h5".format(it))
+        model.save(r"./models/CNN_FF_{}.h5".format(it))
 
     return history_dict
 ```
@@ -321,13 +321,13 @@ I used **random search** approach to select the best set of hyperparameters give
 
 Defining parameters dictionary 
 ```python
-parameters_dct = {"no_of_filters": [8, 16, 32, 48, 64],
+parameters_dct = {"no_of_filters": [8, 16, 24, 32, 40, 48, 56, 64],
                   "kern_size": [3, 4, 5, 6, 7],
                   "max_pool": [2, 3, 4],
                   "dropout_perc": [0.1, 0.2, 0.3, 0.4, 0.5],
-                  "dense_size": [64, 128, 192, 256, 512, 1024],
+                  "dense_size": [64, 128, 192, 256, 384, 512],
                   "optimizers": ["adam", "adamax", "nadam", "RMSProp"],
-                  "batch_size": [16, 32, 64, 128, 256, 512, 1024]
+                  "batch_size": [16, 32, 32, 48, 64, 96, 128]
                   }
 ```
 
@@ -345,7 +345,8 @@ def run_random_search(X, y, params, no_of_searches=1):
     """Perform random search on hyper parameters list, saves models and validation accuracies.
 
     Args:
-          
+        X: training data
+        y: labels for training data
         params: Dictionary with hyperparameters for CNN random search.
         no_of_searches: How many times random search is executed.
 
@@ -355,7 +356,7 @@ def run_random_search(X, y, params, no_of_searches=1):
     val_accs_list = []
 
     for i in range(no_of_searches):
-        # Creating a tuple for each iteration of random search with selected parameters
+        # Creating a dict for each iteration of randomly selected parameters
 
         params_dict = {"iteration": i + 1,
                        "no_of_filters": rd.choice(params["no_of_filters"]),
@@ -368,7 +369,8 @@ def run_random_search(X, y, params, no_of_searches=1):
                        }
 
         np.save(r"./models/random_search/params/params_dict_{}.npy".format(i), params_dict)
-
+        
+        # Training model using selected parameters 
         hist_dict = create_model(X, y,
                                  it=i + 1,
                                  no_of_filters=params_dict["no_of_filters"],
@@ -383,7 +385,7 @@ def run_random_search(X, y, params, no_of_searches=1):
 
         val_accs_list.append(hist_dict['val_acc'][-1])
 
-    np.save(r"./models/random_search/val_accs_list.npy", val_accs_list)
+        np.save(r"./models/random_search/val_accs_list.npy", val_accs_list)
 
     return val_accs_list
 ```
@@ -391,50 +393,78 @@ def run_random_search(X, y, params, no_of_searches=1):
 Running the search. 
 
 ```python
-mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 20)
+mod.run_random_search(X_train_cnn, y_train_cnn, parameters_dct, 70)
 ```
 
-Loading list with accuracies and printing parameters for the "best" combination from random_search. 
+Loading list with accuracies and printing "top 3" sets of parameters from random_search. 
 
-```
+```python
 val_accs_list = np.load(r"./models/random_search/val_accs_list.npy")
 ```
 
+```python
+top_three_indices = np.argsort(val_accs_list)[::-1][:3]
+
+for i in top_three_indices:
+
+    print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(i)))
 ```
-print(np.load(r"./models/random_search/params/params_dict_{}.npy".format(val_accs_list.argmax())))
+```
+{'iteration': 69, 'no_of_filters': 24, 'kern_size': 3, 'max_pool': 3, 'dropout_perc_conv': 0.1, 'dropout_perc_dens': 0.4, 'dense_size': 384, 'optimizer': 'adam', 'batch_size': 24}
+{'iteration': 11, 'no_of_filters': 56, 'kern_size': 6, 'max_pool': 3, 'dropout_perc_conv': 0.3, 'dropout_perc_dens': 0.4, 'dense_size': 384, 'optimizer': 'adam', 'batch_size': 24}
+{'iteration': 56, 'no_of_filters': 40, 'kern_size': 5, 'max_pool': 3, 'dropout_perc_conv': 0.3, 'dropout_perc_dens': 0.3, 'dense_size': 512, 'optimizer': 'adam', 'batch_size': 24}
+```
+
+Training three models based on top-3 sets of parameters: 
+```python
+mod.create_model(X_train_cnn, y_train_cnn, it="1", no_of_filters=24, kern_size=3,
+                 max_p_size=3, drop_perc_conv=0.1, drop_perc_dense=0.4,
+                 dens_size=384, val_split_perc=0.1, no_of_epochs=40,
+                 optimizer="adam", random_search=False, batch_size=24)
+
+mod.create_model(X_train_cnn, y_train_cnn, it="2", no_of_filters=56, kern_size=6,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.4,
+                 dens_size=384, val_split_perc=0.1, no_of_epochs=40,
+                 optimizer="adam", random_search=False, batch_size=24)
+
+mod.create_model(X_train_cnn, y_train_cnn, it="3", no_of_filters=40, kern_size=5,
+                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.3,
+                 dens_size=512, val_split_perc=0.1, no_of_epochs=40,
+                 optimizer="adam", random_search=False, batch_size=24)
 ```
 
 ```
 {'iteration': 13, 'no_of_filters': 64, 'kern_size': 7, 'max_pool': 3, 'dropout_perc_conv': 0.3, 'dropout_perc_dens': 0.2, 'dense_size': 128, 'optimizer': 'nadam'}
 ```
-Based on above, training model with given parameters on full training data set.
-
-```python
-mod.create_model(X_train_cnn, y_train_cnn, it="F", no_of_filters=32, kern_size=3,
-                 max_p_size=3, drop_perc_conv=0.3, drop_perc_dense=0.2,
-                 dens_size=128, val_split_perc=0.1, no_of_epochs=30,
-                 optimizer="adam", random_search=False)
-```
-Model will be saved as ```models/CNN_v_F.h5```
 
 ## 4. Model evaluation
 ### 4.1 Load model and evaluate on test data set 
 
-```
-model = load_saved_model(r"./models/CNN_v_F.h5")
-```
-
-```
-score = model.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=32)
+```python
+model_1 = keras.models.load_model(r"./models/CNN_FF_1.h5")
+model_2 = keras.models.load_model(r"./models/CNN_FF_2.h5")
+model_3 = keras.models.load_model(r"./models/CNN_FF_3.h5")
 ```
 
+```python
+score_1 = model_1.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
+score_2 = model_2.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
+score_3 = model_3.evaluate(X_test_cnn, y_test_cat_cnn, batch_size=64)
 ```
-print("Test set accuracy {}%".format(np.round(score[1], 3) * 100))
+
+```python
+print("Model_1: val_acc - {}".format(np.round(score_1[1] * 100, 2)),
+      "\nModel_2: val_acc - {}".format(np.round(score_2[1] * 100, 2)),
+      "\nModel_3: val_acc - {}".format(np.round(score_3[1] * 100, 2)))
 ```
 ```
-Test set accuracy 94.8%
+Model_1: val_acc - 94.72% 
+Model_2: val_acc - 95.16% 
+Model_3: val_acc - 95.19%
 ```
-Accuracy on test score is 94.8%. 
+
+Highest accuracy on test set has been identified for model_3 which is considered as final from now. 
+Its accuracy is estimated on 95.2%.
 
 ### 4.2 Confusion matrix 
 
@@ -503,13 +533,13 @@ def display_errors(X, y_true, y_pred, labels):
 
 ## Summary 
 
-- model did pretty well on test set scoring 94.8% accuracy
+- estimated model accuracy - 95.2% 
 - based on insightful view presented in confusion matrix, we can conclude that the model misclassifies characters with similar shape Examples:  
   - "o" vs "0" 
   - "i" vs "1"
   - "z' vs "2"
   - "v" vs "u" 
-- errors made by classifier are easier to understand if we take a look at exemplary errors in section 4.3. Some of those examples probably could be also misclassified by human eye
+- errors made by classifier are easier to understand if we take a look at exemplary errors in section 4.3. Some of those probably could be also misclassified by human eye
 - during the development process data augmentation (via small 10 degree rotation and 0.1 relative position translation) was also considered and tested. However, the same model had 93.2% accuracy on test set therefore the solution was not adapted 
 
 ### References 
